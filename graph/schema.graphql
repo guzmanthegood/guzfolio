@@ -1,0 +1,41 @@
+type Query {
+  user(id:ID!): User!
+  portfolio(id:ID!): Portfolio!
+  allUsers: [User!]!
+  allCurrencies: [Currency!]!
+}
+
+type Mutation {
+  createUser(input: CreateUserInput!): User!
+  createCurrency(input: CreateCurrencyInput!): Currency!
+}
+
+input CreateUserInput {
+  email: String!
+  name: String!
+}
+
+input CreateCurrencyInput {
+  code: String!
+  name: String!
+}
+
+type User {
+  id: ID!
+  email: String!
+  name: String!
+  portfolios: [Portfolio!]
+}
+
+type Portfolio {
+  id:ID!
+  name: String
+	fiatCurrency: Currency!
+  user: User!
+}
+
+type Currency {
+  id: ID!
+  code: String!
+  name: String!
+}
