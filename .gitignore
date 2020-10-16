@@ -1,0 +1,14 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Goland/IntelliJ files
+.idea/
+
+# Realize temporary files
+tmp/
+
+# GraphQL Environment Variables
+.env
