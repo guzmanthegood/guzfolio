@@ -20,21 +20,21 @@ input CreateCurrencyInput {
   name: String!
 }
 
-type User {
+type User @goModel(model: "guzfolio/model.User") {
   id: ID!
   email: String!
   name: String!
-  portfolios: [Portfolio!]
+  portfolios: [Portfolio!] @goField(forceResolver: true)
 }
 
-type Portfolio {
+type Portfolio @goModel(model: "guzfolio/model.Portfolio") {
   id:ID!
   name: String
-	fiatCurrency: Currency!
-  user: User!
+  fiatCurrency: Currency! @goField(forceResolver: true)
+  user: User! @goField(forceResolver: true)
 }
 
-type Currency {
+type Currency @goModel(model: "guzfolio/model.Currency") {
   id: ID!
   code: String!
   name: String!

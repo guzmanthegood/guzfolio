@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"guzfolio/graph/model"
+	"guzfolio/model"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -36,7 +36,9 @@ type Config struct {
 
 type ResolverRoot interface {
 	Mutation() MutationResolver
+	Portfolio() PortfolioResolver
 	Query() QueryResolver
+	User() UserResolver
 }
 
 type DirectiveRoot struct {
@@ -80,11 +82,18 @@ type MutationResolver interface {
 	CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error)
 	CreateCurrency(ctx context.Context, input model.CreateCurrencyInput) (*model.Currency, error)
 }
+type PortfolioResolver interface {
+	FiatCurrency(ctx context.Context, obj *model.Portfolio) (*model.Currency, error)
+	User(ctx context.Context, obj *model.Portfolio) (*model.User, error)
+}
 type QueryResolver interface {
 	User(ctx context.Context, id string) (*model.User, error)
 	Portfolio(ctx context.Context, id string) (*model.Portfolio, error)
 	AllUsers(ctx context.Context) ([]*model.User, error)
 	AllCurrencies(ctx context.Context) ([]*model.Currency, error)
+}
+type UserResolver interface {
+	Portfolios(ctx context.Context, obj *model.User) ([]*model.Portfolio, error)
 }
 
 type executableSchema struct {
@@ -305,7 +314,27 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema.graphql", Input: `type Query {
+	{Name: "graph/schema/directives.graphql", Input: `# GQL Directives
+# This part is fairly necessary and is described in the gql documentation
+# https://gqlgen.com/config/
+directive @goModel(model: String, models: [String!]) on OBJECT
+    | INPUT_OBJECT
+    | SCALAR
+    | ENUM
+    | INTERFACE
+    | UNION
+
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
+    | FIELD_DEFINITION`, BuiltIn: false},
+	{Name: "graph/schema/scalars.graphql", Input: `# resolves to time.Time
+scalar Time
+
+# resolves to map[string]interface{}
+scalar Map
+
+# resolves to interface{}
+scalar Any`, BuiltIn: false},
+	{Name: "graph/schema/schema.graphql", Input: `type Query {
   user(id:ID!): User!
   portfolio(id:ID!): Portfolio!
   allUsers: [User!]!
@@ -327,21 +356,21 @@ input CreateCurrencyInput {
   name: String!
 }
 
-type User {
+type User @goModel(model: "guzfolio/model.User") {
   id: ID!
   email: String!
   name: String!
-  portfolios: [Portfolio!]
+  portfolios: [Portfolio!] @goField(forceResolver: true)
 }
 
-type Portfolio {
+type Portfolio @goModel(model: "guzfolio/model.Portfolio") {
   id:ID!
   name: String
-	fiatCurrency: Currency!
-  user: User!
+  fiatCurrency: Currency! @goField(forceResolver: true)
+  user: User! @goField(forceResolver: true)
 }
 
-type Currency {
+type Currency @goModel(model: "guzfolio/model.Currency") {
   id: ID!
   code: String!
   name: String!
@@ -359,7 +388,7 @@ func (ec *executionContext) field_Mutation_createCurrency_args(ctx context.Conte
 	var arg0 model.CreateCurrencyInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCreateCurrencyInput2guzfolioᚋgraphᚋmodelᚐCreateCurrencyInput(ctx, tmp)
+		arg0, err = ec.unmarshalNCreateCurrencyInput2guzfolioᚋmodelᚐCreateCurrencyInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -374,7 +403,7 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 	var arg0 model.CreateUserInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCreateUserInput2guzfolioᚋgraphᚋmodelᚐCreateUserInput(ctx, tmp)
+		arg0, err = ec.unmarshalNCreateUserInput2guzfolioᚋmodelᚐCreateUserInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -610,7 +639,7 @@ func (ec *executionContext) _Mutation_createUser(ctx context.Context, field grap
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖguzfolioᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖguzfolioᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createCurrency(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -652,7 +681,7 @@ func (ec *executionContext) _Mutation_createCurrency(ctx context.Context, field 
 	}
 	res := resTmp.(*model.Currency)
 	fc.Result = res
-	return ec.marshalNCurrency2ᚖguzfolioᚋgraphᚋmodelᚐCurrency(ctx, field.Selections, res)
+	return ec.marshalNCurrency2ᚖguzfolioᚋmodelᚐCurrency(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Portfolio_id(ctx context.Context, field graphql.CollectedField, obj *model.Portfolio) (ret graphql.Marshaler) {
@@ -733,14 +762,14 @@ func (ec *executionContext) _Portfolio_fiatCurrency(ctx context.Context, field g
 		Object:     "Portfolio",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.FiatCurrency, nil
+		return ec.resolvers.Portfolio().FiatCurrency(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -754,7 +783,7 @@ func (ec *executionContext) _Portfolio_fiatCurrency(ctx context.Context, field g
 	}
 	res := resTmp.(*model.Currency)
 	fc.Result = res
-	return ec.marshalNCurrency2ᚖguzfolioᚋgraphᚋmodelᚐCurrency(ctx, field.Selections, res)
+	return ec.marshalNCurrency2ᚖguzfolioᚋmodelᚐCurrency(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Portfolio_user(ctx context.Context, field graphql.CollectedField, obj *model.Portfolio) (ret graphql.Marshaler) {
@@ -768,14 +797,14 @@ func (ec *executionContext) _Portfolio_user(ctx context.Context, field graphql.C
 		Object:     "Portfolio",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.User, nil
+		return ec.resolvers.Portfolio().User(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -789,7 +818,7 @@ func (ec *executionContext) _Portfolio_user(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖguzfolioᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖguzfolioᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -831,7 +860,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖguzfolioᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖguzfolioᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_portfolio(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -873,7 +902,7 @@ func (ec *executionContext) _Query_portfolio(ctx context.Context, field graphql.
 	}
 	res := resTmp.(*model.Portfolio)
 	fc.Result = res
-	return ec.marshalNPortfolio2ᚖguzfolioᚋgraphᚋmodelᚐPortfolio(ctx, field.Selections, res)
+	return ec.marshalNPortfolio2ᚖguzfolioᚋmodelᚐPortfolio(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_allUsers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -908,7 +937,7 @@ func (ec *executionContext) _Query_allUsers(ctx context.Context, field graphql.C
 	}
 	res := resTmp.([]*model.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚕᚖguzfolioᚋgraphᚋmodelᚐUserᚄ(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚕᚖguzfolioᚋmodelᚐUserᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_allCurrencies(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -943,7 +972,7 @@ func (ec *executionContext) _Query_allCurrencies(ctx context.Context, field grap
 	}
 	res := resTmp.([]*model.Currency)
 	fc.Result = res
-	return ec.marshalNCurrency2ᚕᚖguzfolioᚋgraphᚋmodelᚐCurrencyᚄ(ctx, field.Selections, res)
+	return ec.marshalNCurrency2ᚕᚖguzfolioᚋmodelᚐCurrencyᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1133,14 +1162,14 @@ func (ec *executionContext) _User_portfolios(ctx context.Context, field graphql.
 		Object:     "User",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Portfolios, nil
+		return ec.resolvers.User().Portfolios(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1151,7 +1180,7 @@ func (ec *executionContext) _User_portfolios(ctx context.Context, field graphql.
 	}
 	res := resTmp.([]*model.Portfolio)
 	fc.Result = res
-	return ec.marshalOPortfolio2ᚕᚖguzfolioᚋgraphᚋmodelᚐPortfolioᚄ(ctx, field.Selections, res)
+	return ec.marshalOPortfolio2ᚕᚖguzfolioᚋmodelᚐPortfolioᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -2392,20 +2421,38 @@ func (ec *executionContext) _Portfolio(ctx context.Context, sel ast.SelectionSet
 		case "id":
 			out.Values[i] = ec._Portfolio_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
 			out.Values[i] = ec._Portfolio_name(ctx, field, obj)
 		case "fiatCurrency":
-			out.Values[i] = ec._Portfolio_fiatCurrency(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Portfolio_fiatCurrency(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "user":
-			out.Values[i] = ec._Portfolio_user(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Portfolio_user(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2517,20 +2564,29 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 		case "id":
 			out.Values[i] = ec._User_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "email":
 			out.Values[i] = ec._User_email(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
 			out.Values[i] = ec._User_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "portfolios":
-			out.Values[i] = ec._User_portfolios(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_portfolios(ctx, field, obj)
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2802,21 +2858,21 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNCreateCurrencyInput2guzfolioᚋgraphᚋmodelᚐCreateCurrencyInput(ctx context.Context, v interface{}) (model.CreateCurrencyInput, error) {
+func (ec *executionContext) unmarshalNCreateCurrencyInput2guzfolioᚋmodelᚐCreateCurrencyInput(ctx context.Context, v interface{}) (model.CreateCurrencyInput, error) {
 	res, err := ec.unmarshalInputCreateCurrencyInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateUserInput2guzfolioᚋgraphᚋmodelᚐCreateUserInput(ctx context.Context, v interface{}) (model.CreateUserInput, error) {
+func (ec *executionContext) unmarshalNCreateUserInput2guzfolioᚋmodelᚐCreateUserInput(ctx context.Context, v interface{}) (model.CreateUserInput, error) {
 	res, err := ec.unmarshalInputCreateUserInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNCurrency2guzfolioᚋgraphᚋmodelᚐCurrency(ctx context.Context, sel ast.SelectionSet, v model.Currency) graphql.Marshaler {
+func (ec *executionContext) marshalNCurrency2guzfolioᚋmodelᚐCurrency(ctx context.Context, sel ast.SelectionSet, v model.Currency) graphql.Marshaler {
 	return ec._Currency(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNCurrency2ᚕᚖguzfolioᚋgraphᚋmodelᚐCurrencyᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Currency) graphql.Marshaler {
+func (ec *executionContext) marshalNCurrency2ᚕᚖguzfolioᚋmodelᚐCurrencyᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Currency) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2840,7 +2896,7 @@ func (ec *executionContext) marshalNCurrency2ᚕᚖguzfolioᚋgraphᚋmodelᚐCu
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNCurrency2ᚖguzfolioᚋgraphᚋmodelᚐCurrency(ctx, sel, v[i])
+			ret[i] = ec.marshalNCurrency2ᚖguzfolioᚋmodelᚐCurrency(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2853,7 +2909,7 @@ func (ec *executionContext) marshalNCurrency2ᚕᚖguzfolioᚋgraphᚋmodelᚐCu
 	return ret
 }
 
-func (ec *executionContext) marshalNCurrency2ᚖguzfolioᚋgraphᚋmodelᚐCurrency(ctx context.Context, sel ast.SelectionSet, v *model.Currency) graphql.Marshaler {
+func (ec *executionContext) marshalNCurrency2ᚖguzfolioᚋmodelᚐCurrency(ctx context.Context, sel ast.SelectionSet, v *model.Currency) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2878,11 +2934,11 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) marshalNPortfolio2guzfolioᚋgraphᚋmodelᚐPortfolio(ctx context.Context, sel ast.SelectionSet, v model.Portfolio) graphql.Marshaler {
+func (ec *executionContext) marshalNPortfolio2guzfolioᚋmodelᚐPortfolio(ctx context.Context, sel ast.SelectionSet, v model.Portfolio) graphql.Marshaler {
 	return ec._Portfolio(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNPortfolio2ᚖguzfolioᚋgraphᚋmodelᚐPortfolio(ctx context.Context, sel ast.SelectionSet, v *model.Portfolio) graphql.Marshaler {
+func (ec *executionContext) marshalNPortfolio2ᚖguzfolioᚋmodelᚐPortfolio(ctx context.Context, sel ast.SelectionSet, v *model.Portfolio) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2907,11 +2963,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNUser2guzfolioᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2guzfolioᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚕᚖguzfolioᚋgraphᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚕᚖguzfolioᚋmodelᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2935,7 +2991,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖguzfolioᚋgraphᚋmodelᚐUser�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUser2ᚖguzfolioᚋgraphᚋmodelᚐUser(ctx, sel, v[i])
+			ret[i] = ec.marshalNUser2ᚖguzfolioᚋmodelᚐUser(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -2948,7 +3004,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖguzfolioᚋgraphᚋmodelᚐUser�
 	return ret
 }
 
-func (ec *executionContext) marshalNUser2ᚖguzfolioᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖguzfolioᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -3211,7 +3267,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return graphql.MarshalBoolean(*v)
 }
 
-func (ec *executionContext) marshalOPortfolio2ᚕᚖguzfolioᚋgraphᚋmodelᚐPortfolioᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Portfolio) graphql.Marshaler {
+func (ec *executionContext) marshalOPortfolio2ᚕᚖguzfolioᚋmodelᚐPortfolioᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Portfolio) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -3238,7 +3294,7 @@ func (ec *executionContext) marshalOPortfolio2ᚕᚖguzfolioᚋgraphᚋmodelᚐP
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNPortfolio2ᚖguzfolioᚋgraphᚋmodelᚐPortfolio(ctx, sel, v[i])
+			ret[i] = ec.marshalNPortfolio2ᚖguzfolioᚋmodelᚐPortfolio(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3258,6 +3314,42 @@ func (ec *executionContext) unmarshalOString2string(ctx context.Context, v inter
 
 func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	return graphql.MarshalString(v)
+}
+
+func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
