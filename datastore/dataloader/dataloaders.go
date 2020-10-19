@@ -1,3 +1,4 @@
+//go:generate go run github.com/vektah/dataloaden UserLoader uint *guzfolio/model.User
 //go:generate go run github.com/vektah/dataloaden CurrencyLoader uint *guzfolio/model.Currency
 //go:generate go run github.com/vektah/dataloaden PortfoliosLoader uint []*guzfolio/model.Portfolio
 
@@ -13,6 +14,7 @@ import (
 )
 
 type Loaders struct {
+	UserByID			*UserLoader
 	CurrencyByID		*CurrencyLoader
 	PortfoliosByUser	*PortfoliosLoader
 }
@@ -23,6 +25,19 @@ func LoaderMiddleware(ds datastore.DataStore, next http.Handler) http.Handler {
 
 		// set this to zero what happens without dataloading
 		wait := 250 * time.Microsecond
+
+		// simple 1:1 loader, fetch an user by its primary key
+		loaders.UserByID = &UserLoader{
+			wait:     wait,
+			maxBatch: 100,
+			fetch: func(keys []uint) ([]*model.User, []error) {
+				users, err := ds.GetUserByIDs(keys)
+				if err != nil {
+					return nil, []error{err}
+				}
+				return users, nil
+			},
+		}
 
 		// simple 1:1 loader, fetch an currency by its primary key
 		loaders.CurrencyByID = &CurrencyLoader{

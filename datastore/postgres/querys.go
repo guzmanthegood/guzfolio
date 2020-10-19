@@ -8,6 +8,12 @@ func (ds dataStore) GetUserByID(id uint) (*model.User, error) {
 	return user, result.Error
 }
 
+func (ds dataStore) GetUserByIDs(ids []uint) ([]*model.User, error) {
+	users := []*model.User{}
+	result := ds.db.Find(&users, ids)
+	return users, result.Error
+}
+
 func (ds dataStore) GetCurrencyByID (id uint) (*model.Currency, error) {
 	currency := &model.Currency{}
 	result := ds.db.First(currency, id)

@@ -4,6 +4,7 @@ type Portfolio @goModel(model: "guzfolio/model.Portfolio") {
     fiatCurrency: Currency! @goField(forceResolver: true)
     fiatCurrencyLoader: Currency! @goField(forceResolver: true)
     user: User! @goField(forceResolver: true)
+    userLoader: User! @goField(forceResolver: true)
 }
 
 input CreatePortfolioInput {
