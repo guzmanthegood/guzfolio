@@ -60,12 +60,10 @@ type ComplexityRoot struct {
 	}
 
 	Portfolio struct {
-		FiatCurrency       func(childComplexity int) int
-		FiatCurrencyLoader func(childComplexity int) int
-		ID                 func(childComplexity int) int
-		Name               func(childComplexity int) int
-		User               func(childComplexity int) int
-		UserLoader         func(childComplexity int) int
+		FiatCurrency func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Name         func(childComplexity int) int
+		User         func(childComplexity int) int
 	}
 
 	Query struct {
@@ -75,11 +73,10 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Email            func(childComplexity int) int
-		ID               func(childComplexity int) int
-		Name             func(childComplexity int) int
-		Portfolios       func(childComplexity int) int
-		PortfoliosLoader func(childComplexity int) int
+		Email      func(childComplexity int) int
+		ID         func(childComplexity int) int
+		Name       func(childComplexity int) int
+		Portfolios func(childComplexity int) int
 	}
 }
 
@@ -95,9 +92,7 @@ type PortfolioResolver interface {
 	ID(ctx context.Context, obj *model.Portfolio) (string, error)
 
 	FiatCurrency(ctx context.Context, obj *model.Portfolio) (*model.Currency, error)
-	FiatCurrencyLoader(ctx context.Context, obj *model.Portfolio) (*model.Currency, error)
 	User(ctx context.Context, obj *model.Portfolio) (*model.User, error)
-	UserLoader(ctx context.Context, obj *model.Portfolio) (*model.User, error)
 }
 type QueryResolver interface {
 	User(ctx context.Context, id string) (*model.User, error)
@@ -108,7 +103,6 @@ type UserResolver interface {
 	ID(ctx context.Context, obj *model.User) (string, error)
 
 	Portfolios(ctx context.Context, obj *model.User) ([]*model.Portfolio, error)
-	PortfoliosLoader(ctx context.Context, obj *model.User) ([]*model.Portfolio, error)
 }
 
 type executableSchema struct {
@@ -197,13 +191,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Portfolio.FiatCurrency(childComplexity), true
 
-	case "Portfolio.fiatCurrencyLoader":
-		if e.complexity.Portfolio.FiatCurrencyLoader == nil {
-			break
-		}
-
-		return e.complexity.Portfolio.FiatCurrencyLoader(childComplexity), true
-
 	case "Portfolio.id":
 		if e.complexity.Portfolio.ID == nil {
 			break
@@ -224,13 +211,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Portfolio.User(childComplexity), true
-
-	case "Portfolio.userLoader":
-		if e.complexity.Portfolio.UserLoader == nil {
-			break
-		}
-
-		return e.complexity.Portfolio.UserLoader(childComplexity), true
 
 	case "Query.allCurrencies":
 		if e.complexity.Query.AllCurrencies == nil {
@@ -285,13 +265,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.Portfolios(childComplexity), true
-
-	case "User.portfoliosLoader":
-		if e.complexity.User.PortfoliosLoader == nil {
-			break
-		}
-
-		return e.complexity.User.PortfoliosLoader(childComplexity), true
 
 	}
 	return 0, false
@@ -395,9 +368,7 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
     id: ID!
     name: String
     fiatCurrency: Currency! @goField(forceResolver: true)
-    fiatCurrencyLoader: Currency! @goField(forceResolver: true)
     user: User! @goField(forceResolver: true)
-    userLoader: User! @goField(forceResolver: true)
 }
 
 input CreatePortfolioInput {
@@ -423,7 +394,6 @@ scalar Any`, BuiltIn: false},
     email: String!
     name: String!
     portfolios: [Portfolio!] @goField(forceResolver: true)
-    portfoliosLoader: [Portfolio!] @goField(forceResolver: true)
 }
 
 input CreateUserInput {
@@ -918,41 +888,6 @@ func (ec *executionContext) _Portfolio_fiatCurrency(ctx context.Context, field g
 	return ec.marshalNCurrency2ᚖguzfolioᚋmodelᚐCurrency(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Portfolio_fiatCurrencyLoader(ctx context.Context, field graphql.CollectedField, obj *model.Portfolio) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Portfolio",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Portfolio().FiatCurrencyLoader(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Currency)
-	fc.Result = res
-	return ec.marshalNCurrency2ᚖguzfolioᚋmodelᚐCurrency(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Portfolio_user(ctx context.Context, field graphql.CollectedField, obj *model.Portfolio) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -972,41 +907,6 @@ func (ec *executionContext) _Portfolio_user(ctx context.Context, field graphql.C
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Portfolio().User(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.User)
-	fc.Result = res
-	return ec.marshalNUser2ᚖguzfolioᚋmodelᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Portfolio_userLoader(ctx context.Context, field graphql.CollectedField, obj *model.Portfolio) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Portfolio",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Portfolio().UserLoader(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1330,38 +1230,6 @@ func (ec *executionContext) _User_portfolios(ctx context.Context, field graphql.
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.User().Portfolios(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.Portfolio)
-	fc.Result = res
-	return ec.marshalOPortfolio2ᚕᚖguzfolioᚋmodelᚐPortfolioᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _User_portfoliosLoader(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.User().PortfoliosLoader(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2703,20 +2571,6 @@ func (ec *executionContext) _Portfolio(ctx context.Context, sel ast.SelectionSet
 				}
 				return res
 			})
-		case "fiatCurrencyLoader":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Portfolio_fiatCurrencyLoader(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "user":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -2726,20 +2580,6 @@ func (ec *executionContext) _Portfolio(ctx context.Context, sel ast.SelectionSet
 					}
 				}()
 				res = ec._Portfolio_user(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "userLoader":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Portfolio_userLoader(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -2872,17 +2712,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 					}
 				}()
 				res = ec._User_portfolios(ctx, field, obj)
-				return res
-			})
-		case "portfoliosLoader":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._User_portfoliosLoader(ctx, field, obj)
 				return res
 			})
 		default:

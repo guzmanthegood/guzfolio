@@ -16,10 +16,6 @@ func (r *userResolver) ID(ctx context.Context, obj *model.User) (string, error) 
 }
 
 func (r *userResolver) Portfolios(ctx context.Context, obj *model.User) ([]*model.Portfolio, error) {
-	return r.DS.GetPortfoliosByUserID(obj.ID)
-}
-
-func (r *userResolver) PortfoliosLoader(ctx context.Context, obj *model.User) ([]*model.Portfolio, error) {
 	return dataloader.ContextLoaders(ctx).PortfoliosByUser.Load(obj.ID)
 }
 
