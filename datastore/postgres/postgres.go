@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"guzfolio/datastore"
+	"guzfolio/model"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -21,6 +22,11 @@ func New(dsn string, debug bool) datastore.DataStore  {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(loggerLvl),
 	})
+
+	// Automigrate model
+	db.AutoMigrate(&model.Currency{})
+	db.AutoMigrate(model.Portfolio{})
+	db.AutoMigrate(&model.User{})
 
 	if err != nil {
 		panic(err)
