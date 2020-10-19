@@ -1,5 +1,5 @@
 type Mutation {
     createUser(input: CreateUserInput!): User!
-    createPortfolio(input: CreatePortfolioInput): Portfolio!
+    createPortfolio(input: CreatePortfolioInput!): Portfolio!
     createCurrency(input: CreateCurrencyInput!): Currency!
 }

@@ -55,7 +55,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		CreateCurrency  func(childComplexity int, input model.CreateCurrencyInput) int
-		CreatePortfolio func(childComplexity int, input *model.CreatePortfolioInput) int
+		CreatePortfolio func(childComplexity int, input model.CreatePortfolioInput) int
 		CreateUser      func(childComplexity int, input model.CreateUserInput) int
 	}
 
@@ -86,7 +86,7 @@ type CurrencyResolver interface {
 }
 type MutationResolver interface {
 	CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error)
-	CreatePortfolio(ctx context.Context, input *model.CreatePortfolioInput) (*model.Portfolio, error)
+	CreatePortfolio(ctx context.Context, input model.CreatePortfolioInput) (*model.Portfolio, error)
 	CreateCurrency(ctx context.Context, input model.CreateCurrencyInput) (*model.Currency, error)
 }
 type PortfolioResolver interface {
@@ -172,7 +172,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreatePortfolio(childComplexity, args["input"].(*model.CreatePortfolioInput)), true
+		return e.complexity.Mutation.CreatePortfolio(childComplexity, args["input"].(model.CreatePortfolioInput)), true
 
 	case "Mutation.createUser":
 		if e.complexity.Mutation.CreateUser == nil {
@@ -376,7 +376,7 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
     | FIELD_DEFINITION`, BuiltIn: false},
 	{Name: "graph/schema/mutation.graphql", Input: `type Mutation {
     createUser(input: CreateUserInput!): User!
-    createPortfolio(input: CreatePortfolioInput): Portfolio!
+    createPortfolio(input: CreatePortfolioInput!): Portfolio!
     createCurrency(input: CreateCurrencyInput!): Currency!
 }
 `, BuiltIn: false},
@@ -388,8 +388,8 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
 }
 
 input CreatePortfolioInput {
-    user: String!
-    fiatCurrency: String!
+    userEmail: String!
+    fiatCurrencyCode: String!
     name: String
 }`, BuiltIn: false},
 	{Name: "graph/schema/query.graphql", Input: `type Query {
@@ -446,10 +446,10 @@ func (ec *executionContext) field_Mutation_createCurrency_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_createPortfolio_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *model.CreatePortfolioInput
+	var arg0 model.CreatePortfolioInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOCreatePortfolioInput2ᚖguzfolioᚋmodelᚐCreatePortfolioInput(ctx, tmp)
+		arg0, err = ec.unmarshalNCreatePortfolioInput2guzfolioᚋmodelᚐCreatePortfolioInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -763,7 +763,7 @@ func (ec *executionContext) _Mutation_createPortfolio(ctx context.Context, field
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreatePortfolio(rctx, args["input"].(*model.CreatePortfolioInput))
+		return ec.resolvers.Mutation().CreatePortfolio(rctx, args["input"].(model.CreatePortfolioInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2450,19 +2450,19 @@ func (ec *executionContext) unmarshalInputCreatePortfolioInput(ctx context.Conte
 
 	for k, v := range asMap {
 		switch k {
-		case "user":
+		case "userEmail":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user"))
-			it.User, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userEmail"))
+			it.UserEmail, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "fiatCurrency":
+		case "fiatCurrencyCode":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fiatCurrency"))
-			it.FiatCurrency, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fiatCurrencyCode"))
+			it.FiatCurrencyCode, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3082,6 +3082,11 @@ func (ec *executionContext) unmarshalNCreateCurrencyInput2guzfolioᚋmodelᚐCre
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCreatePortfolioInput2guzfolioᚋmodelᚐCreatePortfolioInput(ctx context.Context, v interface{}) (model.CreatePortfolioInput, error) {
+	res, err := ec.unmarshalInputCreatePortfolioInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNCreateUserInput2guzfolioᚋmodelᚐCreateUserInput(ctx context.Context, v interface{}) (model.CreateUserInput, error) {
 	res, err := ec.unmarshalInputCreateUserInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3494,14 +3499,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return graphql.MarshalBoolean(*v)
-}
-
-func (ec *executionContext) unmarshalOCreatePortfolioInput2ᚖguzfolioᚋmodelᚐCreatePortfolioInput(ctx context.Context, v interface{}) (*model.CreatePortfolioInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputCreatePortfolioInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOPortfolio2ᚕᚖguzfolioᚋmodelᚐPortfolioᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Portfolio) graphql.Marshaler {

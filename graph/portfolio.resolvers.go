@@ -5,21 +5,21 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
+	"strconv"
 )
 
 func (r *portfolioResolver) ID(ctx context.Context, obj *model.Portfolio) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
 func (r *portfolioResolver) FiatCurrency(ctx context.Context, obj *model.Portfolio) (*model.Currency, error) {
-	panic(fmt.Errorf("not implemented"))
+	return nil, nil
 }
 
 func (r *portfolioResolver) User(ctx context.Context, obj *model.Portfolio) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.DS.GetUserByID(obj.UserID)
 }
 
 // Portfolio returns generated.PortfolioResolver implementation.

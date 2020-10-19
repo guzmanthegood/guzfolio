@@ -6,7 +6,7 @@ type Portfolio @goModel(model: "guzfolio/model.Portfolio") {
 }
 
 input CreatePortfolioInput {
-    user: String!
-    fiatCurrency: String!
+    userEmail: String!
+    fiatCurrencyCode: String!
     name: String
 }

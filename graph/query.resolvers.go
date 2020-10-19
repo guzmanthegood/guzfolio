@@ -6,16 +6,18 @@ package graph
 import (
 	"context"
 	"fmt"
+	"strconv"
+
 	"guzfolio/graph/generated"
 	"guzfolio/model"
-	"log"
 )
 
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	log.Println("query user ************")
-	user := &model.User{}
-	r.DS.GetDB().First(user, 10)
-	return user, nil
+	userID, err := strconv.Atoi(id)
+	if err != nil {
+		return nil, err
+	}
+	return r.DS.GetUserByID(uint(userID))
 }
 
 func (r *queryResolver) Portfolio(ctx context.Context, id string) (*model.Portfolio, error) {

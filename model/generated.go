@@ -3,9 +3,9 @@
 package model
 
 type CreatePortfolioInput struct {
-	User         string  `json:"user"`
-	FiatCurrency string  `json:"fiatCurrency"`
-	Name         *string `json:"name"`
+	UserEmail        string  `json:"userEmail"`
+	FiatCurrencyCode string  `json:"fiatCurrencyCode"`
+	Name             *string `json:"name"`
 }
 
 type CreateUserInput struct {
