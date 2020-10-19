@@ -1,6 +1,5 @@
 type Query {
     user(id:ID!): User!
-    portfolio(id:ID!): Portfolio!
     allUsers: [User!]!
     allCurrencies: [Currency!]!
 }

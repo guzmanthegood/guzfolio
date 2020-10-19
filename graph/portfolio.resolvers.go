@@ -15,7 +15,7 @@ func (r *portfolioResolver) ID(ctx context.Context, obj *model.Portfolio) (strin
 }
 
 func (r *portfolioResolver) FiatCurrency(ctx context.Context, obj *model.Portfolio) (*model.Currency, error) {
-	return nil, nil
+	return r.DS.GetCurrencyByID(obj.FiatCurrencyID)
 }
 
 func (r *portfolioResolver) User(ctx context.Context, obj *model.Portfolio) (*model.User, error) {

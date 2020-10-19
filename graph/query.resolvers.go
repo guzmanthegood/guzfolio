@@ -5,11 +5,9 @@ package graph
 
 import (
 	"context"
-	"fmt"
-	"strconv"
-
 	"guzfolio/graph/generated"
 	"guzfolio/model"
+	"strconv"
 )
 
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
@@ -20,16 +18,12 @@ func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error
 	return r.DS.GetUserByID(uint(userID))
 }
 
-func (r *queryResolver) Portfolio(ctx context.Context, id string) (*model.Portfolio, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
 func (r *queryResolver) AllUsers(ctx context.Context) ([]*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.DS.GetAllUsers()
 }
 
 func (r *queryResolver) AllCurrencies(ctx context.Context) ([]*model.Currency, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.DS.GetAllCurrencies()
 }
 
 // Query returns generated.QueryResolver implementation.
