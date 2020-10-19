@@ -1,8 +1,10 @@
 package model
 
 type Portfolio struct {
-	ID           string    `json:"id"`
-	Name         *string   `json:"name"`
-	FiatCurrency *Currency `json:"fiatCurrency"`
-	User         *User     `json:"user"`
+	ID           	uint      	`json:"id"`
+	Name         	*string   	`json:"name"`
+	FiatCurrency 	Currency 	`json:"fiatCurrency"`
+	FiatCurrencyID 	uint	  	`json:"fiatCurrencyID"`
+	User         	User     	`json:"user"`
+	UserID         	uint	  	`json:"userID"`
 }

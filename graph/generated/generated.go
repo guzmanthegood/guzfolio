@@ -35,6 +35,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Currency() CurrencyResolver
 	Mutation() MutationResolver
 	Portfolio() PortfolioResolver
 	Query() QueryResolver
@@ -78,11 +79,16 @@ type ComplexityRoot struct {
 	}
 }
 
+type CurrencyResolver interface {
+	ID(ctx context.Context, obj *model.Currency) (string, error)
+}
 type MutationResolver interface {
 	CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error)
 	CreateCurrency(ctx context.Context, input model.CreateCurrencyInput) (*model.Currency, error)
 }
 type PortfolioResolver interface {
+	ID(ctx context.Context, obj *model.Portfolio) (string, error)
+
 	FiatCurrency(ctx context.Context, obj *model.Portfolio) (*model.Currency, error)
 	User(ctx context.Context, obj *model.Portfolio) (*model.User, error)
 }
@@ -93,6 +99,8 @@ type QueryResolver interface {
 	AllCurrencies(ctx context.Context) ([]*model.Currency, error)
 }
 type UserResolver interface {
+	ID(ctx context.Context, obj *model.User) (string, error)
+
 	Portfolios(ctx context.Context, obj *model.User) ([]*model.Portfolio, error)
 }
 
@@ -314,6 +322,17 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
+	{Name: "graph/schema/currency.graphql", Input: `type Currency @goModel(model: "guzfolio/model.Currency") {
+    id: ID!
+    code: String!
+    name: String!
+}
+
+input CreateCurrencyInput {
+    code: String!
+    name: String!
+}
+`, BuiltIn: false},
 	{Name: "graph/schema/directives.graphql", Input: `# GQL Directives
 # This part is fairly necessary and is described in the gql documentation
 # https://gqlgen.com/config/
@@ -326,6 +345,24 @@ directive @goModel(model: String, models: [String!]) on OBJECT
 
 directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION
     | FIELD_DEFINITION`, BuiltIn: false},
+	{Name: "graph/schema/mutation.graphql", Input: `type Mutation {
+    createUser(input: CreateUserInput!): User!
+    createCurrency(input: CreateCurrencyInput!): Currency!
+}
+`, BuiltIn: false},
+	{Name: "graph/schema/portfolio.graphql", Input: `type Portfolio @goModel(model: "guzfolio/model.Portfolio") {
+    id: ID!
+    name: String
+    fiatCurrency: Currency! @goField(forceResolver: true)
+    user: User! @goField(forceResolver: true)
+}`, BuiltIn: false},
+	{Name: "graph/schema/query.graphql", Input: `type Query {
+    user(id:ID!): User!
+    portfolio(id:ID!): Portfolio!
+    allUsers: [User!]!
+    allCurrencies: [Currency!]!
+}
+`, BuiltIn: false},
 	{Name: "graph/schema/scalars.graphql", Input: `# resolves to time.Time
 scalar Time
 
@@ -334,47 +371,20 @@ scalar Map
 
 # resolves to interface{}
 scalar Any`, BuiltIn: false},
-	{Name: "graph/schema/schema.graphql", Input: `type Query {
-  user(id:ID!): User!
-  portfolio(id:ID!): Portfolio!
-  allUsers: [User!]!
-  allCurrencies: [Currency!]!
-}
-
-type Mutation {
-  createUser(input: CreateUserInput!): User!
-  createCurrency(input: CreateCurrencyInput!): Currency!
+	{Name: "graph/schema/user.graphql", Input: `type User @goModel(model: "guzfolio/model.User") {
+    id: ID!
+    email: String!
+    name: String!
+    portfolios: [Portfolio!] @goField(forceResolver: true)
 }
 
 input CreateUserInput {
-  email: String!
-  name: String!
+    email: String!
+    name: String!
 }
 
-input CreateCurrencyInput {
-  code: String!
-  name: String!
-}
 
-type User @goModel(model: "guzfolio/model.User") {
-  id: ID!
-  email: String!
-  name: String!
-  portfolios: [Portfolio!] @goField(forceResolver: true)
-}
-
-type Portfolio @goModel(model: "guzfolio/model.Portfolio") {
-  id:ID!
-  name: String
-  fiatCurrency: Currency! @goField(forceResolver: true)
-  user: User! @goField(forceResolver: true)
-}
-
-type Currency @goModel(model: "guzfolio/model.Currency") {
-  id: ID!
-  code: String!
-  name: String!
-}`, BuiltIn: false},
+`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
@@ -506,14 +516,14 @@ func (ec *executionContext) _Currency_id(ctx context.Context, field graphql.Coll
 		Object:     "Currency",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
+		return ec.resolvers.Currency().ID(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -695,14 +705,14 @@ func (ec *executionContext) _Portfolio_id(ctx context.Context, field graphql.Col
 		Object:     "Portfolio",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
+		return ec.resolvers.Portfolio().ID(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1057,14 +1067,14 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 		Object:     "User",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
+		return ec.resolvers.User().ID(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2346,19 +2356,28 @@ func (ec *executionContext) _Currency(ctx context.Context, sel ast.SelectionSet,
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Currency")
 		case "id":
-			out.Values[i] = ec._Currency_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Currency_id(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "code":
 			out.Values[i] = ec._Currency_code(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "name":
 			out.Values[i] = ec._Currency_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -2419,10 +2438,19 @@ func (ec *executionContext) _Portfolio(ctx context.Context, sel ast.SelectionSet
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Portfolio")
 		case "id":
-			out.Values[i] = ec._Portfolio_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Portfolio_id(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "name":
 			out.Values[i] = ec._Portfolio_name(ctx, field, obj)
 		case "fiatCurrency":
@@ -2562,10 +2590,19 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("User")
 		case "id":
-			out.Values[i] = ec._User_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_id(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "email":
 			out.Values[i] = ec._User_email(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

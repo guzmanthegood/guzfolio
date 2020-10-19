@@ -1,7 +1,7 @@
 package model
 
 type Currency struct {
-	ID   string `json:"id"`
-	Code string `json:"code"`
+	ID   uint 	`json:"id"`
+	Code string `json:"code" gorm:"unique"`
 	Name string `json:"name"`
 }

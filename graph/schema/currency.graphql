@@ -1,0 +1,10 @@
+type Currency @goModel(model: "guzfolio/model.Currency") {
+    id: ID!
+    code: String!
+    name: String!
+}
+
+input CreateCurrencyInput {
+    code: String!
+    name: String!
+}
