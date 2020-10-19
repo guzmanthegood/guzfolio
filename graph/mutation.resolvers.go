@@ -14,6 +14,10 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 	panic(fmt.Errorf("not implemented"))
 }
 
+func (r *mutationResolver) CreatePortfolio(ctx context.Context, input *model.CreatePortfolioInput) (*model.Portfolio, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 func (r *mutationResolver) CreateCurrency(ctx context.Context, input model.CreateCurrencyInput) (*model.Currency, error) {
 	panic(fmt.Errorf("not implemented"))
 }
