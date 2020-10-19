@@ -8,7 +8,7 @@ import (
 
 type Currency struct {
 	ID   uint         `json:"id"`
-	Code string       `json:"code"`
+	Code string       `json:"code" gorm:"unique"`
 	Name string       `json:"name"`
 	Type CurrencyType `json:"type"`
 }

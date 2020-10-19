@@ -8,10 +8,11 @@ import (
 	"fmt"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
+	"strconv"
 )
 
 func (r *userResolver) ID(ctx context.Context, obj *model.User) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
 func (r *userResolver) Portfolios(ctx context.Context, obj *model.User) ([]*model.Portfolio, error) {

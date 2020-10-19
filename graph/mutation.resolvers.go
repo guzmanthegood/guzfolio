@@ -11,7 +11,12 @@ import (
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	user := &model.User{
+		Email: input.Email,
+		Name:  input.Name,
+	}
+	result := r.DS.GetDB().Create(user)
+	return user, result.Error
 }
 
 func (r *mutationResolver) CreatePortfolio(ctx context.Context, input *model.CreatePortfolioInput) (*model.Portfolio, error) {
@@ -19,7 +24,13 @@ func (r *mutationResolver) CreatePortfolio(ctx context.Context, input *model.Cre
 }
 
 func (r *mutationResolver) CreateCurrency(ctx context.Context, input model.CreateCurrencyInput) (*model.Currency, error) {
-	panic(fmt.Errorf("not implemented"))
+	currency := &model.Currency{
+		Code: input.Code,
+		Name: input.Name,
+		Type: input.Type,
+	}
+	result := r.DS.GetDB().Create(currency)
+	return currency, result.Error
 }
 
 // Mutation returns generated.MutationResolver implementation.

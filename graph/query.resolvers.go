@@ -8,10 +8,14 @@ import (
 	"fmt"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
+	"log"
 )
 
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	log.Println("query user ************")
+	user := &model.User{}
+	r.DS.GetDB().First(user, 10)
+	return user, nil
 }
 
 func (r *queryResolver) Portfolio(ctx context.Context, id string) (*model.Portfolio, error) {
