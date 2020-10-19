@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"guzfolio/datastore/dataloader"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
 	"strconv"
@@ -16,6 +17,10 @@ func (r *portfolioResolver) ID(ctx context.Context, obj *model.Portfolio) (strin
 
 func (r *portfolioResolver) FiatCurrency(ctx context.Context, obj *model.Portfolio) (*model.Currency, error) {
 	return r.DS.GetCurrencyByID(obj.FiatCurrencyID)
+}
+
+func (r *portfolioResolver) FiatCurrencyLoader(ctx context.Context, obj *model.Portfolio) (*model.Currency, error) {
+	return dataloader.ContextLoaders(ctx).CurrencyByID.Load(obj.FiatCurrencyID)
 }
 
 func (r *portfolioResolver) User(ctx context.Context, obj *model.Portfolio) (*model.User, error) {

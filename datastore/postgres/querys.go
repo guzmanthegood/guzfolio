@@ -14,6 +14,12 @@ func (ds dataStore) GetCurrencyByID (id uint) (*model.Currency, error) {
 	return currency, result.Error
 }
 
+func (ds dataStore) GetCurrencyByIDs (ids []uint) ([]*model.Currency, error) {
+	currencies := []*model.Currency{}
+	result := ds.db.Find(&currencies, ids)
+	return currencies, result.Error
+}
+
 func (ds dataStore) GetAllCurrencies() ([]*model.Currency, error) {
 	currencies := []*model.Currency{}
 	result := ds.db.Find(&currencies)

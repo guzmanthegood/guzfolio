@@ -2,6 +2,7 @@ package main
 
 import (
 	"guzfolio/datastore"
+	"guzfolio/datastore/dataloader"
 	"guzfolio/graph"
 	"guzfolio/graph/generated"
 
@@ -13,15 +14,14 @@ import (
 func newRouter(ds datastore.DataStore) *chi.Mux {
 	r := chi.NewRouter()
 
-	schema := generated.NewExecutableSchema(generated.Config{
+	queryHandler := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
 		Resolvers: &graph.Resolver{
 			DS: ds,
 		}},
-	)
-	srv := handler.NewDefaultServer(schema)
+	))
 
 	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	r.Handle("/query", srv)
+	r.Handle("/query", dataloader.LoaderMiddleware(ds, queryHandler))
 
 	return r
 }
