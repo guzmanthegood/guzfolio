@@ -30,7 +30,7 @@ func (s *server) initialize() {
 	}
 
 	// new data base connection
-	ds := postgres.New(os.Getenv("PG_CONNECTION_STRING"))
+	ds := postgres.New(os.Getenv("PG_CONNECTION_STRING"), true)
 
 	// initialize server
 	s.server = &http.Server{
