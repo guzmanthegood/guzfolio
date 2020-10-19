@@ -17,6 +17,7 @@ func New(dsn string, debug bool) datastore.DataStore  {
 	if debug {
 		loggerLvl = logger.Info
 	}
+	
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(loggerLvl),
 	})
