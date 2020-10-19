@@ -14,6 +14,7 @@ type dataStore struct {
 }
 
 func New(dsn string, debug bool) datastore.DataStore  {
+	// set debug mode
 	loggerLvl := logger.Silent
 	if debug {
 		loggerLvl = logger.Info
