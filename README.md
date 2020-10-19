@@ -10,7 +10,7 @@ functionality like as authorization, nested elements in the data model, unit tes
 
 # Getting Started
 1. Download and install [Go 1.13 or greater](https://golang.org/doc/install)
-2. Export env variable **PG_CONNECTION_STRING**
+2. Configure Postgres database connection
     - [OPTIONAL] Download and install [Postgres](https://www.postgresqltutorial.com/install-postgresql/)
     - Export (or configure in your favourite IDE) the environment variable `PG_CONNECTION_STRING`  
     `postgres://user:pass@localhost:5432/db_name?sslmode=disable`
