@@ -18,11 +18,7 @@ type server struct {
 
 func main() {
 	s := server{}
-	s.initialize()
-	s.start()
-}
 
-func (s *server) initialize() {
 	// get default port
 	s.port = os.Getenv("PORT")
 	if s.port == "" {
@@ -37,6 +33,8 @@ func (s *server) initialize() {
 		Addr:    ":" + s.port,
 		Handler: newRouter(ds),
 	}
+
+	s.start()
 }
 
 // start server
