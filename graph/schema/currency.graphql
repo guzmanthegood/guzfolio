@@ -6,9 +6,9 @@ type Currency @goModel(model: "guzfolio/model.Currency"){
 }
 
 input CreateCurrencyInput @goModel(model: "guzfolio/model.CreateCurrencyInput"){
-code: String!
-name: String!
-type: CurrencyType!
+    code: String!
+    name: String!
+    type: CurrencyType!
 }
 
 enum CurrencyType @goModel(model: "guzfolio/model.CurrencyType"){

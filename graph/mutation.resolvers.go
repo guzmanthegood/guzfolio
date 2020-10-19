@@ -5,17 +5,20 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.DS.CreateUser(input)
+}
+
+func (r *mutationResolver) CreatePortfolio(ctx context.Context, input model.CreatePortfolioInput) (*model.Portfolio, error) {
+	return r.DS.CreatePortfolio(input)
 }
 
 func (r *mutationResolver) CreateCurrency(ctx context.Context, input model.CreateCurrencyInput) (*model.Currency, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.DS.CreateCurrency(input)
 }
 
 // Mutation returns generated.MutationResolver implementation.

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"guzfolio/datastore"
+	"guzfolio/datastore/postgres"
 )
 
 const defaultPort = "8080"
@@ -30,11 +30,7 @@ func (s *server) initialize() {
 	}
 
 	// new data base connection
-	ds := datastore.New(os.Getenv("PG_CONNECTION_STRING"))
-	err := ds.AutoMigrate()
-	if err != nil {
-		log.Fatal(err)
-	}
+	ds := postgres.New(os.Getenv("PG_CONNECTION_STRING"))
 
 	// initialize server
 	s.server = &http.Server{
