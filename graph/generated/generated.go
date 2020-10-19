@@ -74,10 +74,11 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Email      func(childComplexity int) int
-		ID         func(childComplexity int) int
-		Name       func(childComplexity int) int
-		Portfolios func(childComplexity int) int
+		Email            func(childComplexity int) int
+		ID               func(childComplexity int) int
+		Name             func(childComplexity int) int
+		Portfolios       func(childComplexity int) int
+		PortfoliosLoader func(childComplexity int) int
 	}
 }
 
@@ -105,6 +106,7 @@ type UserResolver interface {
 	ID(ctx context.Context, obj *model.User) (string, error)
 
 	Portfolios(ctx context.Context, obj *model.User) ([]*model.Portfolio, error)
+	PortfoliosLoader(ctx context.Context, obj *model.User) ([]*model.Portfolio, error)
 }
 
 type executableSchema struct {
@@ -275,6 +277,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Portfolios(childComplexity), true
 
+	case "User.portfoliosLoader":
+		if e.complexity.User.PortfoliosLoader == nil {
+			break
+		}
+
+		return e.complexity.User.PortfoliosLoader(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -404,6 +413,7 @@ scalar Any`, BuiltIn: false},
     email: String!
     name: String!
     portfolios: [Portfolio!] @goField(forceResolver: true)
+    portfoliosLoader: [Portfolio!] @goField(forceResolver: true)
 }
 
 input CreateUserInput {
@@ -1275,6 +1285,38 @@ func (ec *executionContext) _User_portfolios(ctx context.Context, field graphql.
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.User().Portfolios(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Portfolio)
+	fc.Result = res
+	return ec.marshalOPortfolio2ᚕᚖguzfolioᚋmodelᚐPortfolioᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _User_portfoliosLoader(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.User().PortfoliosLoader(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2771,6 +2813,17 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 					}
 				}()
 				res = ec._User_portfolios(ctx, field, obj)
+				return res
+			})
+		case "portfoliosLoader":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_portfoliosLoader(ctx, field, obj)
 				return res
 			})
 		default:

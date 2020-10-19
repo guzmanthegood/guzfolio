@@ -3,6 +3,7 @@ type User @goModel(model: "guzfolio/model.User") {
     email: String!
     name: String!
     portfolios: [Portfolio!] @goField(forceResolver: true)
+    portfoliosLoader: [Portfolio!] @goField(forceResolver: true)
 }
 
 input CreateUserInput {

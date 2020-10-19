@@ -37,3 +37,9 @@ func (ds dataStore) GetPortfoliosByUserID(id uint) ([]*model.Portfolio, error){
 	result := ds.db.Where("user_id = ?", id).Find(&portfolios)
 	return portfolios, result.Error
 }
+
+func (ds dataStore) GetPortfoliosByUserIDs(ids []uint) ([]*model.Portfolio, error){
+	portfolios := []*model.Portfolio{}
+	result := ds.db.Where("user_id IN ?", ids).Find(&portfolios)
+	return portfolios, result.Error
+}
