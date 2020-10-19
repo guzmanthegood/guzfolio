@@ -2,11 +2,6 @@
 
 package model
 
-type CreateCurrencyInput struct {
-	Code string `json:"code"`
-	Name string `json:"name"`
-}
-
 type CreateUserInput struct {
 	Email string `json:"email"`
 	Name  string `json:"name"`

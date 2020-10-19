@@ -50,6 +50,7 @@ type ComplexityRoot struct {
 		Code func(childComplexity int) int
 		ID   func(childComplexity int) int
 		Name func(childComplexity int) int
+		Type func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -139,6 +140,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Currency.Name(childComplexity), true
+
+	case "Currency.type":
+		if e.complexity.Currency.Type == nil {
+			break
+		}
+
+		return e.complexity.Currency.Type(childComplexity), true
 
 	case "Mutation.createCurrency":
 		if e.complexity.Mutation.CreateCurrency == nil {
@@ -322,15 +330,22 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "graph/schema/currency.graphql", Input: `type Currency @goModel(model: "guzfolio/model.Currency") {
+	{Name: "graph/schema/currency.graphql", Input: `type Currency @goModel(model: "guzfolio/model.Currency"){
     id: ID!
     code: String!
     name: String!
+    type: CurrencyType!
 }
 
-input CreateCurrencyInput {
-    code: String!
-    name: String!
+input CreateCurrencyInput @goModel(model: "guzfolio/model.CreateCurrencyInput"){
+code: String!
+name: String!
+type: CurrencyType!
+}
+
+enum CurrencyType @goModel(model: "guzfolio/model.CurrencyType"){
+    FIAT
+    CRYPTO
 }
 `, BuiltIn: false},
 	{Name: "graph/schema/directives.graphql", Input: `# GQL Directives
@@ -608,6 +623,41 @@ func (ec *executionContext) _Currency_name(ctx context.Context, field graphql.Co
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Currency_type(ctx context.Context, field graphql.CollectedField, obj *model.Currency) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Currency",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.CurrencyType)
+	fc.Result = res
+	return ec.marshalNCurrencyType2guzfolioᚋmodelᚐCurrencyType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2302,6 +2352,14 @@ func (ec *executionContext) unmarshalInputCreateCurrencyInput(ctx context.Contex
 			if err != nil {
 				return it, err
 			}
+		case "type":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+			it.Type, err = ec.unmarshalNCurrencyType2guzfolioᚋmodelᚐCurrencyType(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -2376,6 +2434,11 @@ func (ec *executionContext) _Currency(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "name":
 			out.Values[i] = ec._Currency_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "type":
+			out.Values[i] = ec._Currency_type(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
@@ -2954,6 +3017,16 @@ func (ec *executionContext) marshalNCurrency2ᚖguzfolioᚋmodelᚐCurrency(ctx 
 		return graphql.Null
 	}
 	return ec._Currency(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNCurrencyType2guzfolioᚋmodelᚐCurrencyType(ctx context.Context, v interface{}) (model.CurrencyType, error) {
+	var res model.CurrencyType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNCurrencyType2guzfolioᚋmodelᚐCurrencyType(ctx context.Context, sel ast.SelectionSet, v model.CurrencyType) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {

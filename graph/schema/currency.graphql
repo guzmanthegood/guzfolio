@@ -1,10 +1,17 @@
-type Currency @goModel(model: "guzfolio/model.Currency") {
+type Currency @goModel(model: "guzfolio/model.Currency"){
     id: ID!
     code: String!
     name: String!
+    type: CurrencyType!
 }
 
-input CreateCurrencyInput {
-    code: String!
-    name: String!
+input CreateCurrencyInput @goModel(model: "guzfolio/model.CreateCurrencyInput"){
+code: String!
+name: String!
+type: CurrencyType!
+}
+
+enum CurrencyType @goModel(model: "guzfolio/model.CurrencyType"){
+    FIAT
+    CRYPTO
 }
