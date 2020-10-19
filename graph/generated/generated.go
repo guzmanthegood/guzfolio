@@ -346,8 +346,7 @@ input CreateCurrencyInput @goModel(model: "guzfolio/model.CreateCurrencyInput"){
 enum CurrencyType @goModel(model: "guzfolio/model.CurrencyType"){
     FIAT
     CRYPTO
-}
-`, BuiltIn: false},
+}`, BuiltIn: false},
 	{Name: "graph/schema/directives.graphql", Input: `# GQL Directives
 # This part is fairly necessary and is described in the gql documentation
 # https://gqlgen.com/config/
@@ -364,8 +363,7 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
     createUser(input: CreateUserInput!): User!
     createPortfolio(input: CreatePortfolioInput!): Portfolio!
     createCurrency(input: CreateCurrencyInput!): Currency!
-}
-`, BuiltIn: false},
+}`, BuiltIn: false},
 	{Name: "graph/schema/portfolio.graphql", Input: `type Portfolio @goModel(model: "guzfolio/model.Portfolio") {
     id: ID!
     name: String
@@ -382,8 +380,7 @@ input CreatePortfolioInput {
     user(id:ID!): User!
     allUsers: [User!]!
     allCurrencies: [Currency!]!
-}
-`, BuiltIn: false},
+}`, BuiltIn: false},
 	{Name: "graph/schema/scalars.graphql", Input: `# resolves to time.Time
 scalar Time
 
@@ -402,10 +399,7 @@ scalar Any`, BuiltIn: false},
 input CreateUserInput {
     email: String!
     name: String!
-}
-
-
-`, BuiltIn: false},
+}`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
