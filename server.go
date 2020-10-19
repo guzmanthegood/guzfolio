@@ -1,11 +1,13 @@
 package main
 
 import (
-	"guzfolio/graph"
-	"guzfolio/graph/generated"
+	"guzfolio/datastore"
 	"log"
 	"net/http"
 	"os"
+
+	"guzfolio/graph"
+	"guzfolio/graph/generated"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -14,6 +16,13 @@ import (
 const defaultPort = "8080"
 
 func main() {
+	// new data base connection
+	ds := datastore.New(os.Getenv("PG_CONNECTION_STRING"))
+	err := ds.AutoMigrate()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort

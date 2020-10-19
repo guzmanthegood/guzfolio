@@ -1,0 +1,4 @@
+type Mutation {
+    createUser(input: CreateUserInput!): User!
+    createCurrency(input: CreateCurrencyInput!): Currency!
+}
