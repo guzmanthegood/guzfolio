@@ -5,7 +5,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"guzfolio/auth"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
@@ -45,7 +44,33 @@ func (r *mutationResolver) Register(ctx context.Context, input model.RegisterInp
 }
 
 func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*model.AuthResponse, error) {
-	panic(fmt.Errorf("not implemented"))
+	// get user
+	user, err := r.DS.GetUserByEmail(input.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	// compare password
+	bytePassword := []byte(input.Password)
+	byteHashedPassword := []byte(user.Password)
+	if err := bcrypt.CompareHashAndPassword(byteHashedPassword, bytePassword); err != nil {
+		return nil, err
+	}
+
+	// generate new access token
+	token, err := auth.GenerateToken(user.ID, user.Email, false)
+	if err != nil {
+		return nil, err
+	}
+
+	authResponse := &model.AuthResponse{
+		AuthToken: &model.AuthToken{
+			AccessToken: token.AccessToken,
+			ExpiredAt:   token.ExpiredAt,
+		},
+		User: user,
+	}
+	return authResponse, nil
 }
 
 func (r *mutationResolver) CreatePortfolio(ctx context.Context, input model.CreatePortfolioInput) (*model.Portfolio, error) {

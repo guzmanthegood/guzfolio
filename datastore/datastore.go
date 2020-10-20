@@ -7,6 +7,7 @@ import (
 type DataStore interface {
 	GetUserByID(id uint) (*model.User, error)
 	GetUserByIDs(ids []uint) ([]*model.User, error)
+	GetUserByEmail(email string) (*model.User, error)
 	GetCurrencyByID (id uint) (*model.Currency, error)
 	GetCurrencyByIDs (ids []uint) ([]*model.Currency, error)
 	GetAllCurrencies() ([]*model.Currency, error)

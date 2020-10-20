@@ -14,6 +14,12 @@ func (ds dataStore) GetUserByIDs(ids []uint) ([]*model.User, error) {
 	return users, result.Error
 }
 
+func (ds dataStore) GetUserByEmail(email string) (*model.User, error) {
+	user := &model.User{}
+	result := ds.db.Where("email = ?", email).First(&user)
+	return user, result.Error
+}
+
 func (ds dataStore) GetCurrencyByID (id uint) (*model.Currency, error) {
 	currency := &model.Currency{}
 	result := ds.db.First(currency, id)
