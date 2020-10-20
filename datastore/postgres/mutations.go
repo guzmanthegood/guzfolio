@@ -11,6 +11,16 @@ func (ds dataStore) CreateUser(input model.CreateUserInput) (*model.User, error)
 	return user, result.Error
 }
 
+func (ds dataStore) RegisterUser(input model.RegisterInput) (*model.User, error) {
+	user := &model.User{
+		Email: input.Email,
+		Password: input.Password,
+		Name:  input.Name,
+	}
+	result := ds.db.Create(user)
+	return user, result.Error
+}
+
 func (ds dataStore) CreatePortfolio(input model.CreatePortfolioInput) (*model.Portfolio, error) {
 	// get user
 	user := model.User{}

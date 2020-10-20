@@ -6,14 +6,16 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"gorm.io/gorm/logger"
-	"guzfolio/model"
 	"log"
 	"os"
 	"strings"
 
+	"guzfolio/model"
+
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func main() {
@@ -74,26 +76,30 @@ func main() {
 	db.Create(&model.Currency{Code: "ATOM", Name: "Cosmos", Type: model.CurrencyTypeCrypto})
 
 	// create users
-	db.Create(&model.User{Name: "Ravi Radish", Email: "rradish0@github.com"})
-	db.Create(&model.User{Name: "Eadie Duffield", Email: "eduffield1@opensource.org"})
-	db.Create(&model.User{Name: "Dory Burchett", Email: "dburchett2@slashdot.org"})
-	db.Create(&model.User{Name: "Gaylord Son", Email: "gson3@chicagotribune.com"})
-	db.Create(&model.User{Name: "Justin Plastow", Email: "jplastow4@tuttocitta.it"})
-	db.Create(&model.User{Name: "Lorene McGarel", Email: "lmcgarel5@scientificamerican.com"})
-	db.Create(&model.User{Name: "Faun McLugaish", Email: "fmclugaish6@paginegialle.it"})
-	db.Create(&model.User{Name: "Maris Jensen", Email: "mjensen7@si.edu"})
-	db.Create(&model.User{Name: "Agneta Pantlin", Email: "apantlin8@macromedia.com"})
-	db.Create(&model.User{Name: "Janetta Sagar", Email: "jsagar9@squarespace.com"})
-	db.Create(&model.User{Name: "Derby O'Duane", Email: "doduanea@theguardian.com"})
-	db.Create(&model.User{Name: "Hettie Glendinning", Email: "hglendinningb@weather.com"})
-	db.Create(&model.User{Name: "Findlay Barlass", Email: "fbarlassc@hatena.ne.jp"})
-	db.Create(&model.User{Name: "Clerissa Merrywether", Email: "cmerrywetherd@fda.gov"})
-	db.Create(&model.User{Name: "Max Sleath", Email: "msleathe@latimes.com"})
-	db.Create(&model.User{Name: "Beale Fransewich", Email: "bfransewichf@yandex.ru"})
-	db.Create(&model.User{Name: "Morgun Gerin", Email: "mgering@independent.co.uk"})
-	db.Create(&model.User{Name: "Devin Antoinet", Email: "dantoineth@typepad.com"})
-	db.Create(&model.User{Name: "Cody Ossulton", Email: "cossultoni@cnbc.com"})
-	db.Create(&model.User{Name: "Susette Varndall", Email: "varndallj@wsj.com"})
+	bytePassword := []byte("guzfolio1234")
+	passwordHash, _ := bcrypt.GenerateFromPassword(bytePassword, bcrypt.DefaultCost)
+	pass := string(passwordHash)
+
+	db.Create(&model.User{Name: "Ravi Radish", Email: "rradish0@github.com", Password: pass})
+	db.Create(&model.User{Name: "Eadie Duffield", Email: "eduffield1@opensource.org", Password: pass})
+	db.Create(&model.User{Name: "Dory Burchett", Email: "dburchett2@slashdot.org", Password: pass})
+	db.Create(&model.User{Name: "Gaylord Son", Email: "gson3@chicagotribune.com", Password: pass})
+	db.Create(&model.User{Name: "Justin Plastow", Email: "jplastow4@tuttocitta.it", Password: pass})
+	db.Create(&model.User{Name: "Lorene McGarel", Email: "lmcgarel5@scientificamerican.com", Password: pass})
+	db.Create(&model.User{Name: "Faun McLugaish", Email: "fmclugaish6@paginegialle.it", Password: pass})
+	db.Create(&model.User{Name: "Maris Jensen", Email: "mjensen7@si.edu", Password: pass})
+	db.Create(&model.User{Name: "Agneta Pantlin", Email: "apantlin8@macromedia.com", Password: pass})
+	db.Create(&model.User{Name: "Janetta Sagar", Email: "jsagar9@squarespace.com", Password: pass})
+	db.Create(&model.User{Name: "Derby O'Duane", Email: "doduanea@theguardian.com", Password: pass})
+	db.Create(&model.User{Name: "Hettie Glendinning", Email: "hglendinningb@weather.com", Password: pass})
+	db.Create(&model.User{Name: "Findlay Barlass", Email: "fbarlassc@hatena.ne.jp", Password: pass})
+	db.Create(&model.User{Name: "Clerissa Merrywether", Email: "cmerrywetherd@fda.gov", Password: pass})
+	db.Create(&model.User{Name: "Max Sleath", Email: "msleathe@latimes.com", Password: pass})
+	db.Create(&model.User{Name: "Beale Fransewich", Email: "bfransewichf@yandex.ru", Password: pass})
+	db.Create(&model.User{Name: "Morgun Gerin", Email: "mgering@independent.co.uk", Password: pass})
+	db.Create(&model.User{Name: "Devin Antoinet", Email: "dantoineth@typepad.com", Password: pass})
+	db.Create(&model.User{Name: "Cody Ossulton", Email: "cossultoni@cnbc.com", Password: pass})
+	db.Create(&model.User{Name: "Susette Varndall", Email: "varndallj@wsj.com", Password: pass})
 
 	// create portfolios
 	defaultPortfolio := "Default portfolio"

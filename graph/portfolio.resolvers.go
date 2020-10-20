@@ -5,10 +5,11 @@ package graph
 
 import (
 	"context"
+	"strconv"
+
 	"guzfolio/datastore/dataloader"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
-	"strconv"
 )
 
 func (r *portfolioResolver) ID(ctx context.Context, obj *model.Portfolio) (string, error) {

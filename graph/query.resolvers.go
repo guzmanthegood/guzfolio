@@ -5,9 +5,10 @@ package graph
 
 import (
 	"context"
+	"strconv"
+
 	"guzfolio/graph/generated"
 	"guzfolio/model"
-	"strconv"
 )
 
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {

@@ -2,6 +2,20 @@
 
 package model
 
+import (
+	"time"
+)
+
+type AuthResponse struct {
+	AuthToken *AuthToken `json:"authToken"`
+	User      *User      `json:"user"`
+}
+
+type AuthToken struct {
+	AccessToken string    `json:"accessToken"`
+	ExpiredAt   time.Time `json:"expiredAt"`
+}
+
 type CreatePortfolioInput struct {
 	UserEmail        string  `json:"userEmail"`
 	FiatCurrencyCode string  `json:"fiatCurrencyCode"`
@@ -11,4 +25,15 @@ type CreatePortfolioInput struct {
 type CreateUserInput struct {
 	Email string `json:"email"`
 	Name  string `json:"name"`
+}
+
+type LoginInput struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type RegisterInput struct {
+	Email    string `json:"email"`
+	Name     string `json:"name"`
+	Password string `json:"password"`
 }
