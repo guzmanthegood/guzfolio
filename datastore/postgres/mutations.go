@@ -1,11 +1,22 @@
 package postgres
 
-import "guzfolio/model"
+import (
+	"guzfolio/model"
 
-func (ds dataStore) RegisterUser(input model.RegisterInput) (*model.User, error) {
+	"golang.org/x/crypto/bcrypt"
+)
+
+func (ds dataStore) CreateUser(input model.CreateUserInput) (*model.User, error) {
+	// secure password
+	bytePassword := []byte(input.Password)
+	passwordHash, err := bcrypt.GenerateFromPassword(bytePassword, bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
 	user := &model.User{
 		Email: input.Email,
-		Password: input.Password,
+		Password: string(passwordHash),
 		Name:  input.Name,
 	}
 	result := ds.db.Create(user)

@@ -14,8 +14,6 @@ import (
 
 func Router(ds datastore.DataStore) http.Handler {
 	r := chi.NewRouter()
-	r.Use(render.SetContentType(render.ContentTypeJSON))
-
 	r.Handle("/register", register(ds))
 	r.Handle("/login", login(ds))
 	return r
@@ -23,27 +21,14 @@ func Router(ds datastore.DataStore) http.Handler {
 
 func register(ds datastore.DataStore) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// get url params
-		email := getURLParam(r, "email")
-		password := getURLParam(r, "password")
-		name := getURLParam(r, "name")
-
-		// secure password
-		bytePassword := []byte(password)
-		passwordHash, err := bcrypt.GenerateFromPassword(bytePassword, bcrypt.DefaultCost)
-		if err != nil {
-			render.PlainText(w, r, err.Error())
-			return
-		}
-
 		// create user
-		input := model.RegisterInput{
-			Email:    email,
-			Name:     name,
-			Password: string(passwordHash),
+		input := model.CreateUserInput{
+			Email:    getURLParam(r, "email"),
+			Name:     getURLParam(r, "password"),
+			Password: getURLParam(r, "name"),
 		}
 
-		user, err := ds.RegisterUser(input)
+		user, err := ds.CreateUser(input)
 		if err != nil {
 			render.PlainText(w, r, err.Error())
 			return
@@ -56,15 +41,7 @@ func register(ds datastore.DataStore) http.Handler {
 			return
 		}
 
-		authResponse := &model.AuthResponse{
-			AuthToken: &model.AuthToken{
-				AccessToken: token.AccessToken,
-				ExpiredAt:   token.ExpiredAt,
-			},
-			User: user,
-		}
-
-		render.JSON(w, r, authResponse)
+		render.PlainText(w, r, token.AccessToken)
 	})
 }
 
@@ -95,15 +72,7 @@ func login(ds datastore.DataStore) http.Handler {
 			return
 		}
 
-		authResponse := &model.AuthResponse{
-			AuthToken: &model.AuthToken{
-				AccessToken: token.AccessToken,
-				ExpiredAt:   token.ExpiredAt,
-			},
-			User: user,
-		}
-
-		render.JSON(w, r, authResponse)
+		render.PlainText(w, r, token.AccessToken)
 	})
 }
 
