@@ -35,7 +35,7 @@ with an existing user (default pass is _guzfolio1234_) in the next endpoints:
     - `/auth/login?email=user@guzfolio.dev&password=guzfolio1234`
 
 When you obtain your JWT token you can use it in the header of your calls to the GraphQL service with the name 
-"Authorization" and value "Bearer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx". If you are using the Playground you can 
+`"Authorization"` and value `"Bearer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"`. If you are using the Playground you can 
 include the following JSON in the HTTP HEADERS section at the bottom.
 
 ```json
