@@ -80,7 +80,7 @@ func main() {
 	passwordHash, _ := bcrypt.GenerateFromPassword(bytePassword, bcrypt.DefaultCost)
 	pass := string(passwordHash)
 
-	db.Create(&model.User{Name: "Ravi Radish", Email: "rradish0@github.com", Password: pass})
+	db.Create(&model.User{Name: "Default User", Email: "user@guzfolio.dev", Password: pass})
 	db.Create(&model.User{Name: "Eadie Duffield", Email: "eduffield1@opensource.org", Password: pass})
 	db.Create(&model.User{Name: "Dory Burchett", Email: "dburchett2@slashdot.org", Password: pass})
 	db.Create(&model.User{Name: "Gaylord Son", Email: "gson3@chicagotribune.com", Password: pass})
