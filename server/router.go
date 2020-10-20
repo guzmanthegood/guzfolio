@@ -1,6 +1,7 @@
 package main
 
 import (
+	"guzfolio/auth"
 	"guzfolio/datastore"
 	"guzfolio/datastore/dataloader"
 	"guzfolio/graph"
@@ -20,8 +21,9 @@ func newRouter(ds datastore.DataStore) *chi.Mux {
 		}},
 	))
 
+	r.Mount("/auth", auth.Router(ds))
 	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	r.Handle("/query", dataloader.LoaderMiddleware(ds, queryHandler))
+	r.Handle("/query", auth.Middleware(dataloader.LoaderMiddleware(ds, queryHandler)))
 
 	return r
 }
