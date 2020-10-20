@@ -30,7 +30,7 @@ As main dependency we will use [gqlgen](https://gqlgen.com) to generate our API,
 - A simple, no fuss, example thats updated regularly to stay current with the API landscape
     - [github.com/oshalygin/gqlgen-pg-todo-example](https://github.com/oshalygin/gqlgen-pg-todo-example)
 - Youtube Golang Grapqhql + gqlgen tutorial
-    - [Golang GraphQL Tutorial Youtube](https://youtu.be/A6lDNao00WQ)
+    - [Golang GraphQL Tutorial Youtube](https://www.youtube.com/watch?v=A6lDNao00WQ&list=PLzQWIQOqeUSNwXcneWYJHUREAIucJ5UZn)
     - [github.com/EQuimper/youtube-golang-graphql-tutorial](https://github.com/EQuimper/youtube-golang-graphql-tutorial)
 - Other resources
     - [Dive into GraphQL](https://medium.com/@ivan.corrales.solera/dive-into-graphql-9bfedf22e1a)
