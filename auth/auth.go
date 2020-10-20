@@ -24,10 +24,10 @@ func GenerateToken(userID uint, userEmail string, isAdmin bool) (*Token, error) 
 
 	// create the claims
 	claims := Claims{
-		userID,
-		userEmail,
-		isAdmin,
-		jwt.StandardClaims{
+		UserID:         userID,
+		UserEmail:      userEmail,
+		IsAdmin:        isAdmin,
+		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expiredAt.Unix(),
 			IssuedAt:  time.Now().Unix(),
 			Issuer:    "guzfolio",
