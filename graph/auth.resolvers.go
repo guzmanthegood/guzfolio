@@ -18,4 +18,3 @@ func (r *authResponseResolver) User(ctx context.Context, obj *model.AuthResponse
 func (r *Resolver) AuthResponse() generated.AuthResponseResolver { return &authResponseResolver{r} }
 
 type authResponseResolver struct{ *Resolver }
-

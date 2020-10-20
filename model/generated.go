@@ -22,11 +22,6 @@ type CreatePortfolioInput struct {
 	Name             *string `json:"name"`
 }
 
-type CreateUserInput struct {
-	Email string `json:"email"`
-	Name  string `json:"name"`
-}
-
 type LoginInput struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`

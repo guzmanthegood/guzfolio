@@ -6,17 +6,12 @@ package graph
 import (
 	"context"
 	"fmt"
-
 	"guzfolio/auth"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
 
 	"golang.org/x/crypto/bcrypt"
 )
-
-func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
-	return r.DS.CreateUser(input)
-}
 
 func (r *mutationResolver) Register(ctx context.Context, input model.RegisterInput) (*model.AuthResponse, error) {
 	// secure password

@@ -2,15 +2,6 @@ package postgres
 
 import "guzfolio/model"
 
-func (ds dataStore) CreateUser(input model.CreateUserInput) (*model.User, error) {
-	user := &model.User{
-		Email: input.Email,
-		Name:  input.Name,
-	}
-	result := ds.db.Create(user)
-	return user, result.Error
-}
-
 func (ds dataStore) RegisterUser(input model.RegisterInput) (*model.User, error) {
 	user := &model.User{
 		Email: input.Email,

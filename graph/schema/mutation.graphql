@@ -1,5 +1,4 @@
 type Mutation {
-    createUser(input: CreateUserInput!): User!
     register(input: RegisterInput!): AuthResponse!
     login(input: LoginInput!): AuthResponse!
 
