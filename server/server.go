@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"guzfolio/datastore/postgres"
 	"log"
 	"net/http"
 	"os"
+
+	"guzfolio/datastore/postgres"
 )
 
 const defaultPort = "8080"
@@ -31,7 +32,7 @@ func main() {
 		s.debug = false
 	}
 
-	// new data base connection
+	// get data base connection
 	ds := postgres.New(os.Getenv("PG_CONNECTION_STRING"), s.debug)
 
 	// initialize server
