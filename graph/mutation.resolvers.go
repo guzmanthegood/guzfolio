@@ -5,72 +5,71 @@ package graph
 
 import (
 	"context"
-	"guzfolio/auth"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 func (r *mutationResolver) Register(ctx context.Context, input model.RegisterInput) (*model.AuthResponse, error) {
-	// secure password
-	bytePassword := []byte(input.Password)
-	passwordHash, err := bcrypt.GenerateFromPassword(bytePassword, bcrypt.DefaultCost)
-	if err != nil {
-		return nil, err
-	}
-	input.Password = string(passwordHash)
-
-	// create user
-	user, err := r.DS.RegisterUser(input)
-	if err != nil {
-		return nil, err
-	}
-
-	// generate new access token
-	token, err := auth.GenerateToken(user.ID, user.Email, false)
-	if err != nil {
-		return nil, err
-	}
-
-	authResponse := &model.AuthResponse{
-		AuthToken: &model.AuthToken{
-			AccessToken: token.AccessToken,
-			ExpiredAt:   token.ExpiredAt,
-		},
-		User: user,
-	}
-	return authResponse, nil
+	//// secure password
+	//bytePassword := []byte(input.Password)
+	//passwordHash, err := bcrypt.GenerateFromPassword(bytePassword, bcrypt.DefaultCost)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//input.Password = string(passwordHash)
+	//
+	//// create user
+	//user, err := r.DS.RegisterUser(input)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//// generate new access token
+	//token, err := auth.GenerateToken(user.ID, user.Email, false)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//authResponse := &model.AuthResponse{
+	//	AuthToken: &model.AuthToken{
+	//		AccessToken: token.AccessToken,
+	//		ExpiredAt:   token.ExpiredAt,
+	//	},
+	//	User: user,
+	//}
+	//return authResponse, nil
+	return nil, nil
 }
 
 func (r *mutationResolver) Login(ctx context.Context, input model.LoginInput) (*model.AuthResponse, error) {
-	// get user
-	user, err := r.DS.GetUserByEmail(input.Email)
-	if err != nil {
-		return nil, err
-	}
-
-	// compare password
-	bytePassword := []byte(input.Password)
-	byteHashedPassword := []byte(user.Password)
-	if err := bcrypt.CompareHashAndPassword(byteHashedPassword, bytePassword); err != nil {
-		return nil, err
-	}
-
-	// generate new access token
-	token, err := auth.GenerateToken(user.ID, user.Email, false)
-	if err != nil {
-		return nil, err
-	}
-
-	authResponse := &model.AuthResponse{
-		AuthToken: &model.AuthToken{
-			AccessToken: token.AccessToken,
-			ExpiredAt:   token.ExpiredAt,
-		},
-		User: user,
-	}
-	return authResponse, nil
+	//// get user
+	//user, err := r.DS.GetUserByEmail(input.Email)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//// compare password
+	//bytePassword := []byte(input.Password)
+	//byteHashedPassword := []byte(user.Password)
+	//if err := bcrypt.CompareHashAndPassword(byteHashedPassword, bytePassword); err != nil {
+	//	return nil, err
+	//}
+	//
+	//// generate new access token
+	//token, err := auth.GenerateToken(user.ID, user.Email, false)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//authResponse := &model.AuthResponse{
+	//	AuthToken: &model.AuthToken{
+	//		AccessToken: token.AccessToken,
+	//		ExpiredAt:   token.ExpiredAt,
+	//	},
+	//	User: user,
+	//}
+	//return authResponse, nil
+	return nil, nil
 }
 
 func (r *mutationResolver) CreatePortfolio(ctx context.Context, input model.CreatePortfolioInput) (*model.Portfolio, error) {

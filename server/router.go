@@ -21,6 +21,7 @@ func newRouter(ds datastore.DataStore) *chi.Mux {
 		}},
 	))
 
+	r.Mount("/auth", auth.Router(ds))
 	r.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	r.Handle("/query", auth.Middleware(dataloader.LoaderMiddleware(ds, queryHandler)))
 

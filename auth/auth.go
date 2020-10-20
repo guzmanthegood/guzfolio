@@ -19,7 +19,7 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-func GenerateToken(userID uint, userEmail string, isAdmin bool) (*Token, error) {
+func generateToken(userID uint, userEmail string, isAdmin bool) (*Token, error) {
 	expiredAt := time.Now().Add(time.Hour * 24 * 1) // a day
 
 	// create the claims
