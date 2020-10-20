@@ -8,8 +8,8 @@ import (
 )
 
 type Token struct {
-	AccessToken string    `json:"accessToken"`
-	ExpiredAt   time.Time `json:"expiredAt"`
+	AccessToken string    	`json:"accessToken"`
+	ExpiredAt   time.Time 	`json:"expiredAt"`
 }
 
 type Claims struct {
