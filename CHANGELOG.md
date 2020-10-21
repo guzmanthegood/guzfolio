@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 (October 21, 2020)
+
+- `auth` package has been added
+    - login/register routes have been added to register new users and log into the system
+    - Authorization middleware has been added to graphQL endpoint
+    - Admin functionality added
+- GraphQL Schema has been updated
+    - profile query has been added (get your own user)
+- JWT authorization pattern explained in `README.md`
+
 ## 0.2.0 (October 20, 2020)
 
 - The following dataloaders have been added and configured
