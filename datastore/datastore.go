@@ -10,6 +10,7 @@ type DataStore interface {
 	GetUserByEmail(email string) (*model.User, error)
 	GetCurrencyByID (id uint) (*model.Currency, error)
 	GetCurrencyByIDs (ids []uint) ([]*model.Currency, error)
+	GetTransactionsByUserID (id uint) ([]*model.Transaction, error)
 	GetAllCurrencies() ([]*model.Currency, error)
 	GetAllUsers() ([]*model.User, error)
 	GetPortfoliosByUserID(id uint) ([]*model.Portfolio, error)
@@ -17,4 +18,5 @@ type DataStore interface {
 	CreateUser(input model.CreateUserInput) (*model.User, error)
 	CreatePortfolio(input model.CreatePortfolioInput) (*model.Portfolio, error)
 	CreateCurrency(input model.CreateCurrencyInput) (*model.Currency, error)
+	CreateTransaction(input model.CreateTransactionInput) (*model.Transaction, error)
 }

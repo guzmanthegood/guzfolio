@@ -5,7 +5,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"guzfolio/datastore/dataloader"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
@@ -25,7 +24,7 @@ func (r *portfolioResolver) User(ctx context.Context, obj *model.Portfolio) (*mo
 }
 
 func (r *portfolioResolver) Transactions(ctx context.Context, obj *model.Portfolio) ([]*model.Transaction, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.DS.GetTransactionsByUserID(obj.ID)
 }
 
 // Portfolio returns generated.PortfolioResolver implementation.

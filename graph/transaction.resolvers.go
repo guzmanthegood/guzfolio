@@ -5,13 +5,13 @@ package graph
 
 import (
 	"context"
-	"fmt"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
+	"strconv"
 )
 
 func (r *transactionResolver) ID(ctx context.Context, obj *model.Transaction) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
 // Transaction returns generated.TransactionResolver implementation.

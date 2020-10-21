@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
 	"guzfolio/auth"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
@@ -34,7 +33,7 @@ func (r *mutationResolver) CreateCurrency(ctx context.Context, input model.Creat
 }
 
 func (r *mutationResolver) CreateTransaction(ctx context.Context, input model.CreateTransactionInput) (*model.Transaction, error) {
-	panic(fmt.Errorf("not implemented"))
+	return r.DS.CreateTransaction(input)
 }
 
 // Mutation returns generated.MutationResolver implementation.

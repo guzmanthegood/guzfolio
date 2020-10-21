@@ -1421,9 +1421,9 @@ func (ec *executionContext) _Transaction_boughtWith(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Currency)
+	res := resTmp.(model.Currency)
 	fc.Result = res
-	return ec.marshalNCurrency2ᚖguzfolioᚋmodelᚐCurrency(ctx, field.Selections, res)
+	return ec.marshalNCurrency2guzfolioᚋmodelᚐCurrency(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Transaction_pricePerCoin(ctx context.Context, field graphql.CollectedField, obj *model.Transaction) (ret graphql.Marshaler) {
@@ -1526,9 +1526,9 @@ func (ec *executionContext) _Transaction_currency(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Currency)
+	res := resTmp.(model.Currency)
 	fc.Result = res
-	return ec.marshalNCurrency2ᚖguzfolioᚋmodelᚐCurrency(ctx, field.Selections, res)
+	return ec.marshalNCurrency2guzfolioᚋmodelᚐCurrency(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Transaction_date(ctx context.Context, field graphql.CollectedField, obj *model.Transaction) (ret graphql.Marshaler) {
@@ -1596,9 +1596,9 @@ func (ec *executionContext) _Transaction_portfolio(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Portfolio)
+	res := resTmp.(model.Portfolio)
 	fc.Result = res
-	return ec.marshalNPortfolio2ᚖguzfolioᚋmodelᚐPortfolio(ctx, field.Selections, res)
+	return ec.marshalNPortfolio2guzfolioᚋmodelᚐPortfolio(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {

@@ -32,6 +32,12 @@ func (ds dataStore) GetCurrencyByIDs (ids []uint) ([]*model.Currency, error) {
 	return currencies, result.Error
 }
 
+func (ds dataStore) GetTransactionsByUserID (id uint) ([]*model.Transaction, error){
+	transactions := []*model.Transaction{}
+	result := ds.db.Where("portfolio_id = ?", id).Find(&transactions)
+	return transactions, result.Error
+}
+
 func (ds dataStore) GetAllCurrencies() ([]*model.Currency, error) {
 	currencies := []*model.Currency{}
 	result := ds.db.Find(&currencies)
