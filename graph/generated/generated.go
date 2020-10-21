@@ -40,6 +40,7 @@ type ResolverRoot interface {
 	Mutation() MutationResolver
 	Portfolio() PortfolioResolver
 	Query() QueryResolver
+	Transaction() TransactionResolver
 	User() UserResolver
 }
 
@@ -116,6 +117,9 @@ type QueryResolver interface {
 	User(ctx context.Context, id string) (*model.User, error)
 	AllUsers(ctx context.Context) ([]*model.User, error)
 	AllCurrencies(ctx context.Context) ([]*model.Currency, error)
+}
+type TransactionResolver interface {
+	ID(ctx context.Context, obj *model.Transaction) (string, error)
 }
 type UserResolver interface {
 	ID(ctx context.Context, obj *model.User) (string, error)
@@ -492,7 +496,7 @@ scalar Map
 
 # resolves to interface{}
 scalar Any`, BuiltIn: false},
-	{Name: "graph/schema/transaction.graphql", Input: `type Transaction {
+	{Name: "graph/schema/transaction.graphql", Input: `type Transaction @goModel(model: "guzfolio/model.Transaction") {
     id: ID!
     boughtWith: Currency!
     pricePerCoin: Float!
@@ -1363,14 +1367,14 @@ func (ec *executionContext) _Transaction_id(ctx context.Context, field graphql.C
 		Object:     "Transaction",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
+		return ec.resolvers.Transaction().ID(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3296,39 +3300,48 @@ func (ec *executionContext) _Transaction(ctx context.Context, sel ast.SelectionS
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Transaction")
 		case "id":
-			out.Values[i] = ec._Transaction_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Transaction_id(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "boughtWith":
 			out.Values[i] = ec._Transaction_boughtWith(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "pricePerCoin":
 			out.Values[i] = ec._Transaction_pricePerCoin(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "quantity":
 			out.Values[i] = ec._Transaction_quantity(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "currency":
 			out.Values[i] = ec._Transaction_currency(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "date":
 			out.Values[i] = ec._Transaction_date(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "portfolio":
 			out.Values[i] = ec._Transaction_portfolio(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))

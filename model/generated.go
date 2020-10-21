@@ -2,10 +2,6 @@
 
 package model
 
-import (
-	"time"
-)
-
 type CreatePortfolioInput struct {
 	UserEmail        string  `json:"userEmail"`
 	FiatCurrencyCode string  `json:"fiatCurrencyCode"`
@@ -24,14 +20,4 @@ type CreateUserInput struct {
 	Email    string `json:"email"`
 	Name     string `json:"name"`
 	Password string `json:"password"`
-}
-
-type Transaction struct {
-	ID           string     `json:"id"`
-	BoughtWith   *Currency  `json:"boughtWith"`
-	PricePerCoin float64    `json:"pricePerCoin"`
-	Quantity     float64    `json:"quantity"`
-	Currency     *Currency  `json:"currency"`
-	Date         time.Time  `json:"date"`
-	Portfolio    *Portfolio `json:"portfolio"`
 }

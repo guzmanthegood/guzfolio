@@ -1,4 +1,4 @@
-type Transaction {
+type Transaction @goModel(model: "guzfolio/model.Transaction") {
     id: ID!
     boughtWith: Currency!
     pricePerCoin: Float!
