@@ -11,6 +11,8 @@ As main dependency we will use [gqlgen](https://gqlgen.com) to generate our API,
     `postgres://user:pass@localhost:5432/db_name?sslmode=disable`
 3. Initialize database schema and seed with some fake data
     - `go run datastore/seed/seed.go`
+4. Set `JWT_SECRET` environment variable with a cool password to sign your tokens
+    - `JWT_SECRET=my_best_kept_secret` 
 4. Start the server running the following command:
     - `go run server/*`
 
@@ -31,8 +33,11 @@ with an existing user (default pass is _guzfolio1234_) in the next endpoints:
 
 - register new user
     - `/auth/register?email=default@guzfolio.dev&password=guzfolio1234&name=default_name`
-- login with existing user
+- login with existing user 
     - `/auth/login?email=user@guzfolio.dev&password=guzfolio1234`
+- you can log in with some default users if you have run seed.go like:
+    - user@guzfolio.dev:guzfolio1234 -> default user
+    - admin@guzfolio.dev:guzfolio1234 -> default **admin** user
 
 When you obtain your JWT token you can use it in the header of your calls to the GraphQL service with the name 
 `"Authorization"` and value `"Bearer xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"`. If you are using the Playground you can 
