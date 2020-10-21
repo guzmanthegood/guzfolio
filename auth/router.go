@@ -66,7 +66,7 @@ func login(ds datastore.DataStore) http.Handler {
 		}
 
 		// generate new access token
-		token, err := generateToken(user.ID, user.Email, false)
+		token, err := generateToken(user.ID, user.Email, user.IsAdmin)
 		if err != nil {
 			render.PlainText(w, r, err.Error())
 			return
