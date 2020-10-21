@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"guzfolio/auth"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
@@ -12,8 +13,7 @@ import (
 )
 
 func (r *queryResolver) Profile(ctx context.Context) (*model.User, error) {
-	u := auth.ContextAuthUser(ctx)
-	return r.DS.GetUserByID(u.UserID)
+	return r.DS.GetUserByID(auth.ContextAuthUser(ctx).UserID)
 }
 
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
@@ -21,10 +21,18 @@ func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error
 	if err != nil {
 		return nil, err
 	}
+
+	a := auth.ContextAuthUser(ctx)
+	if !auth.ContextAuthUser(ctx).IsAdmin && uint(userID) != a.UserID {
+		return nil, errors.New("action not allowed")
+	}
 	return r.DS.GetUserByID(uint(userID))
 }
 
 func (r *queryResolver) AllUsers(ctx context.Context) ([]*model.User, error) {
+	if !auth.ContextAuthUser(ctx).IsAdmin {
+		return nil, errors.New("action not allowed")
+	}
 	return r.DS.GetAllUsers()
 }
 

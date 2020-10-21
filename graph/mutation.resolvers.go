@@ -5,19 +5,31 @@ package graph
 
 import (
 	"context"
+	"errors"
+
+	"guzfolio/auth"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
+	if !auth.ContextAuthUser(ctx).IsAdmin {
+		return nil, errors.New("action not allowed")
+	}
 	return r.DS.CreateUser(input)
 }
 
 func (r *mutationResolver) CreatePortfolio(ctx context.Context, input model.CreatePortfolioInput) (*model.Portfolio, error) {
+	if !auth.ContextAuthUser(ctx).IsAdmin {
+		return nil, errors.New("action not allowed")
+	}
 	return r.DS.CreatePortfolio(input)
 }
 
 func (r *mutationResolver) CreateCurrency(ctx context.Context, input model.CreateCurrencyInput) (*model.Currency, error) {
+	if !auth.ContextAuthUser(ctx).IsAdmin {
+		return nil, errors.New("action not allowed")
+	}
 	return r.DS.CreateCurrency(input)
 }
 
