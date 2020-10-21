@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 	"guzfolio/datastore/dataloader"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
@@ -21,6 +22,10 @@ func (r *portfolioResolver) FiatCurrency(ctx context.Context, obj *model.Portfol
 
 func (r *portfolioResolver) User(ctx context.Context, obj *model.Portfolio) (*model.User, error) {
 	return dataloader.ContextLoaders(ctx).UserByID.Load(obj.UserID)
+}
+
+func (r *portfolioResolver) Transactions(ctx context.Context, obj *model.Portfolio) ([]*model.Transaction, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Portfolio returns generated.PortfolioResolver implementation.

@@ -1,0 +1,17 @@
+type Transaction {
+    id: ID!
+    boughtWith: Currency!
+    pricePerCoin: Float!
+    quantity: Float!
+    currency: Currency!
+    date: Time!
+    portfolio: Portfolio!
+}
+
+input CreateTransactionInput {
+    porfolioID: ID!
+    boughtWith: String!
+    pricePerCoin: Float!
+    quantity: Float!
+    currencyCode: String!
+}
