@@ -2,11 +2,14 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"strings"
+
+	"guzfolio/model"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -22,7 +25,7 @@ func Middleware(next http.Handler) http.Handler {
 		// get authorization token "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ..."
 		tokenString, err := getAuthorizationTokenString(r)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			http.Error(w, formattedErrorMessage(err.Error()), http.StatusUnauthorized)
 			return
 		}
 
@@ -34,14 +37,14 @@ func Middleware(next http.Handler) http.Handler {
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			http.Error(w, formattedErrorMessage(err.Error()), http.StatusUnauthorized)
 			return
 		}
 
 		// parse token claims into auth user
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok || !token.Valid {
-			http.Error(w, "not valid jwt token", http.StatusUnauthorized)
+			http.Error(w, formattedErrorMessage("not valid jwt token"), http.StatusUnauthorized)
 			return
 		}
 
@@ -68,6 +71,11 @@ func getAuthorizationTokenString(r *http.Request) (string, error) {
 	}
 
 	return authorizationHeaderParts[1], nil
+}
+
+func formattedErrorMessage(msg string) string {
+	e, _ := json.Marshal(model.GraphQLError(msg, "auth middleware"))
+	return string(e)
 }
 
 type contextKeyType struct{ name string }
