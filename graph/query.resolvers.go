@@ -5,10 +5,16 @@ package graph
 
 import (
 	"context"
+	"guzfolio/auth"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
 	"strconv"
 )
+
+func (r *queryResolver) Profile(ctx context.Context) (*model.User, error) {
+	u := auth.ContextAuthUser(ctx)
+	return r.DS.GetUserByID(u.UserID)
+}
 
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
 	userID, err := strconv.Atoi(id)

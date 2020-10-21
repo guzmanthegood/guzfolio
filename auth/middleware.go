@@ -12,7 +12,7 @@ import (
 )
 
 type User struct {
-	UserID		float64
+	UserID		uint
 	UserEmail 	string
 	IsAdmin		bool
 }
@@ -46,7 +46,7 @@ func Middleware(next http.Handler) http.Handler {
 		}
 
 		user := &User{
-			UserID:    claims["user_id"].(float64),
+			UserID:    uint(claims["user_id"].(float64)),
 			UserEmail: claims["user_email"].(string),
 			IsAdmin:   claims["is_admin"].(bool),
 		}

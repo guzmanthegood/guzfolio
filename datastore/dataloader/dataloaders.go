@@ -19,7 +19,7 @@ type Loaders struct {
 	PortfoliosByUser	*PortfoliosLoader
 }
 
-func LoaderMiddleware(ds datastore.DataStore, next http.Handler) http.Handler {
+func Middleware(ds datastore.DataStore, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		loaders := Loaders{}
 

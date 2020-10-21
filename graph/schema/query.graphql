@@ -1,4 +1,5 @@
 type Query {
+    profile: User!
     user(id:ID!): User!
     allUsers: [User!]!
     allCurrencies: [Currency!]!

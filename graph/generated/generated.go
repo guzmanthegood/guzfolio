@@ -69,6 +69,7 @@ type ComplexityRoot struct {
 	Query struct {
 		AllCurrencies func(childComplexity int) int
 		AllUsers      func(childComplexity int) int
+		Profile       func(childComplexity int) int
 		User          func(childComplexity int, id string) int
 	}
 
@@ -96,6 +97,7 @@ type PortfolioResolver interface {
 	User(ctx context.Context, obj *model.Portfolio) (*model.User, error)
 }
 type QueryResolver interface {
+	Profile(ctx context.Context) (*model.User, error)
 	User(ctx context.Context, id string) (*model.User, error)
 	AllUsers(ctx context.Context) ([]*model.User, error)
 	AllCurrencies(ctx context.Context) ([]*model.Currency, error)
@@ -226,6 +228,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.AllUsers(childComplexity), true
+
+	case "Query.profile":
+		if e.complexity.Query.Profile == nil {
+			break
+		}
+
+		return e.complexity.Query.Profile(childComplexity), true
 
 	case "Query.user":
 		if e.complexity.Query.User == nil {
@@ -385,6 +394,7 @@ input CreatePortfolioInput {
     name: String
 }`, BuiltIn: false},
 	{Name: "graph/schema/query.graphql", Input: `type Query {
+    profile: User!
     user(id:ID!): User!
     allUsers: [User!]!
     allCurrencies: [Currency!]!
@@ -917,6 +927,41 @@ func (ec *executionContext) _Portfolio_user(ctx context.Context, field graphql.C
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Portfolio().User(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖguzfolioᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_profile(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Profile(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2664,6 +2709,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "profile":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_profile(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "user":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
