@@ -50,6 +50,12 @@ func (ds dataStore) GetAllUsers() ([]*model.User, error){
 	return users, result.Error
 }
 
+func (ds dataStore) GetPortfolioByID(id uint) (*model.Portfolio, error) {
+	portfolio := &model.Portfolio{}
+	result := ds.db.First(portfolio, id)
+	return portfolio, result.Error
+}
+
 func (ds dataStore) GetPortfoliosByUserID(id uint) ([]*model.Portfolio, error){
 	portfolios := []*model.Portfolio{}
 	result := ds.db.Where("user_id = ?", id).Find(&portfolios)

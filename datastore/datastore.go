@@ -13,6 +13,7 @@ type DataStore interface {
 	GetTransactionsByUserID (id uint) ([]*model.Transaction, error)
 	GetAllCurrencies() ([]*model.Currency, error)
 	GetAllUsers() ([]*model.User, error)
+	GetPortfolioByID(id uint) (*model.Portfolio, error)
 	GetPortfoliosByUserID(id uint) ([]*model.Portfolio, error)
 	GetPortfoliosByUserIDs(id []uint) ([]*model.Portfolio, error)
 	CreateUser(input model.CreateUserInput) (*model.User, error)

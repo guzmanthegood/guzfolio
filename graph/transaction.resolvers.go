@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"guzfolio/datastore/dataloader"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
 	"strconv"
@@ -12,6 +13,18 @@ import (
 
 func (r *transactionResolver) ID(ctx context.Context, obj *model.Transaction) (string, error) {
 	return strconv.FormatUint(uint64(obj.ID), 10), nil
+}
+
+func (r *transactionResolver) BoughtWith(ctx context.Context, obj *model.Transaction) (*model.Currency, error) {
+	return dataloader.ContextLoaders(ctx).CurrencyByID.Load(obj.BoughtWithID)
+}
+
+func (r *transactionResolver) Currency(ctx context.Context, obj *model.Transaction) (*model.Currency, error) {
+	return dataloader.ContextLoaders(ctx).CurrencyByID.Load(obj.CurrencyID)
+}
+
+func (r *transactionResolver) Portfolio(ctx context.Context, obj *model.Transaction) (*model.Portfolio, error) {
+	return r.DS.GetPortfolioByID(obj.ID)
 }
 
 // Transaction returns generated.TransactionResolver implementation.

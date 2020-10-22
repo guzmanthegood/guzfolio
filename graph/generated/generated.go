@@ -120,6 +120,11 @@ type QueryResolver interface {
 }
 type TransactionResolver interface {
 	ID(ctx context.Context, obj *model.Transaction) (string, error)
+	BoughtWith(ctx context.Context, obj *model.Transaction) (*model.Currency, error)
+
+	Currency(ctx context.Context, obj *model.Transaction) (*model.Currency, error)
+
+	Portfolio(ctx context.Context, obj *model.Transaction) (*model.Portfolio, error)
 }
 type UserResolver interface {
 	ID(ctx context.Context, obj *model.User) (string, error)
@@ -498,12 +503,12 @@ scalar Map
 scalar Any`, BuiltIn: false},
 	{Name: "graph/schema/transaction.graphql", Input: `type Transaction @goModel(model: "guzfolio/model.Transaction") {
     id: ID!
-    boughtWith: Currency!
+    boughtWith: Currency! @goField(forceResolver: true)
     pricePerCoin: Float!
     quantity: Float!
-    currency: Currency!
+    currency: Currency! @goField(forceResolver: true)
     date: Time!
-    portfolio: Portfolio!
+    portfolio: Portfolio! @goField(forceResolver: true)
 }
 
 input CreateTransactionInput {
@@ -1402,14 +1407,14 @@ func (ec *executionContext) _Transaction_boughtWith(ctx context.Context, field g
 		Object:     "Transaction",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.BoughtWith, nil
+		return ec.resolvers.Transaction().BoughtWith(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1421,9 +1426,9 @@ func (ec *executionContext) _Transaction_boughtWith(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.Currency)
+	res := resTmp.(*model.Currency)
 	fc.Result = res
-	return ec.marshalNCurrency2guzfolioᚋmodelᚐCurrency(ctx, field.Selections, res)
+	return ec.marshalNCurrency2ᚖguzfolioᚋmodelᚐCurrency(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Transaction_pricePerCoin(ctx context.Context, field graphql.CollectedField, obj *model.Transaction) (ret graphql.Marshaler) {
@@ -1507,14 +1512,14 @@ func (ec *executionContext) _Transaction_currency(ctx context.Context, field gra
 		Object:     "Transaction",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Currency, nil
+		return ec.resolvers.Transaction().Currency(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1526,9 +1531,9 @@ func (ec *executionContext) _Transaction_currency(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.Currency)
+	res := resTmp.(*model.Currency)
 	fc.Result = res
-	return ec.marshalNCurrency2guzfolioᚋmodelᚐCurrency(ctx, field.Selections, res)
+	return ec.marshalNCurrency2ᚖguzfolioᚋmodelᚐCurrency(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Transaction_date(ctx context.Context, field graphql.CollectedField, obj *model.Transaction) (ret graphql.Marshaler) {
@@ -1577,14 +1582,14 @@ func (ec *executionContext) _Transaction_portfolio(ctx context.Context, field gr
 		Object:     "Transaction",
 		Field:      field,
 		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Portfolio, nil
+		return ec.resolvers.Transaction().Portfolio(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1596,9 +1601,9 @@ func (ec *executionContext) _Transaction_portfolio(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.Portfolio)
+	res := resTmp.(*model.Portfolio)
 	fc.Result = res
-	return ec.marshalNPortfolio2guzfolioᚋmodelᚐPortfolio(ctx, field.Selections, res)
+	return ec.marshalNPortfolio2ᚖguzfolioᚋmodelᚐPortfolio(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
@@ -3314,10 +3319,19 @@ func (ec *executionContext) _Transaction(ctx context.Context, sel ast.SelectionS
 				return res
 			})
 		case "boughtWith":
-			out.Values[i] = ec._Transaction_boughtWith(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Transaction_boughtWith(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "pricePerCoin":
 			out.Values[i] = ec._Transaction_pricePerCoin(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -3329,20 +3343,38 @@ func (ec *executionContext) _Transaction(ctx context.Context, sel ast.SelectionS
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "currency":
-			out.Values[i] = ec._Transaction_currency(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Transaction_currency(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "date":
 			out.Values[i] = ec._Transaction_date(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
 		case "portfolio":
-			out.Values[i] = ec._Transaction_portfolio(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Transaction_portfolio(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
