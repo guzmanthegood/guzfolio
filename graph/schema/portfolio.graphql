@@ -1,6 +1,10 @@
 type Portfolio @goModel(model: "guzfolio/model.Portfolio") {
     id: ID!
     name: String
+    totalValue: Float! @goField(forceResolver: true)
+    netCost: Float! @goField(forceResolver: true)
+    percentChange: Float! @goField(forceResolver: true)
+    totalTransactions: Int! @goField(forceResolver: true)
     user: User! @goField(forceResolver: true)
     transactions: [Transaction!] @goField(forceResolver: true)
 }

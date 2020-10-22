@@ -112,12 +112,21 @@ func main() {
 			currency := allCurrencies[r.Intn(len(allCurrencies))]
 			q := rand.Float64() * 10
 
+			// generates a difference of 20% in the value of the transaction
+			p := float64(rand.Intn(20)) / 100.00
+			if rand.Float32() < 0.5 {
+				p = 1 - p
+			} else {
+				p = 1 + p
+			}
+
 			// create some transactions
 			tx := model.Transaction{
 				Quantity:     q,
 				CurrencyID:   currency.ID,
-				PricePerCoin: currency.MarketValue,
+				PricePerCoin: currency.MarketValue * p,
 				PortfolioID:  portfolio.ID,
+				CreatedAt: time.Now().AddDate(0,0, -rand.Intn(150)),
 			}
 			db.Create(&tx)
 		}

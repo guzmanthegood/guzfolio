@@ -15,6 +15,26 @@ func (r *portfolioResolver) ID(ctx context.Context, obj *model.Portfolio) (strin
 	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
+func (r *portfolioResolver) TotalValue(ctx context.Context, obj *model.Portfolio) (float64, error) {
+	report, err := r.DS.GetPortfolioReport(obj.ID)
+	return report.TotalValue, err
+}
+
+func (r *portfolioResolver) NetCost(ctx context.Context, obj *model.Portfolio) (float64, error) {
+	report, err := r.DS.GetPortfolioReport(obj.ID)
+	return report.NetCost, err
+}
+
+func (r *portfolioResolver) PercentChange(ctx context.Context, obj *model.Portfolio) (float64, error) {
+	report, err := r.DS.GetPortfolioReport(obj.ID)
+	return report.PercentChange, err
+}
+
+func (r *portfolioResolver) TotalTransactions(ctx context.Context, obj *model.Portfolio) (int, error) {
+	report, err := r.DS.GetPortfolioReport(obj.ID)
+	return report.TotalTransactions, err
+}
+
 func (r *portfolioResolver) User(ctx context.Context, obj *model.Portfolio) (*model.User, error) {
 	return dataloader.ContextLoaders(ctx).UserByID.Load(obj.UserID)
 }
