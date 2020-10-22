@@ -35,9 +35,21 @@ func Middleware(ds datastore.DataStore, next http.Handler) http.Handler {
 			wait:     wait,
 			maxBatch: 100,
 			fetch: func(keys []uint) ([]*model.User, []error) {
-				users, err := ds.GetUserByIDs(keys)
+				usersDB, err := ds.GetUserByIDs(keys)
 				if err != nil {
 					return nil, []error{err}
+				}
+
+				usersMap := make(map[uint]*model.User)
+				for _, u := range usersDB {
+					usersMap[u.ID] = u
+				}
+
+				users := make([]*model.User, len(keys))
+				for i, k := range keys {
+					if u, ok := usersMap[k]; ok {
+						users[i] = u
+					}
 				}
 				return users, nil
 			},
@@ -48,9 +60,21 @@ func Middleware(ds datastore.DataStore, next http.Handler) http.Handler {
 			wait:     wait,
 			maxBatch: 100,
 			fetch: func(keys []uint) ([]*model.Currency, []error) {
-				currencies, err := ds.GetCurrencyByIDs(keys)
+				currenciesDB, err := ds.GetCurrencyByIDs(keys)
 				if err != nil {
 					return nil, []error{err}
+				}
+
+				currenciesMap := make(map[uint]*model.Currency)
+				for _, c := range currenciesDB {
+					currenciesMap[c.ID] = c
+				}
+
+				currencies := make([]*model.Currency, len(keys))
+				for i, k := range keys {
+					if c, ok := currenciesMap[k]; ok {
+						currencies[i] = c
+					}
 				}
 				return currencies, nil
 			},
@@ -61,11 +85,23 @@ func Middleware(ds datastore.DataStore, next http.Handler) http.Handler {
 			wait:     wait,
 			maxBatch: 100,
 			fetch: func(keys []uint) ([]*model.Portfolio, []error) {
-				currencies, err := ds.GetPortfolioByIDs(keys)
+				portfoliosDB, err := ds.GetPortfolioByIDs(keys)
 				if err != nil {
 					return nil, []error{err}
 				}
-				return currencies, nil
+
+				portfoliosMap := make(map[uint]*model.Portfolio)
+				for _, p := range portfoliosDB {
+					portfoliosMap[p.ID] = p
+				}
+
+				portfolios := make([]*model.Portfolio, len(keys))
+				for i, k := range keys {
+					if p, ok := portfoliosMap[k]; ok {
+						portfolios[i] = p
+					}
+				}
+				return portfolios, nil
 			},
 		}
 
