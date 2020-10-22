@@ -46,7 +46,7 @@ func main() {
 	db.AutoMigrate(&model.Transaction{})
 
 	// create currencies
-	t := time.Date(2020, time.Month(10), 1, 8, 0, 0, 0, time.UTC)
+	t := time.Date(2020, time.Month(10), 22, 11, 0, 0, 0, time.UTC)
 	db.Create(&model.Currency{Code: "BTC", Name: "Bitcoin", MarketValue: 12909.29, CreatedAt: t, UpdatedAt: t})
 	db.Create(&model.Currency{Code: "ETH", Name: "Ethereum", MarketValue: 411.30, CreatedAt: t, UpdatedAt: t})
 	db.Create(&model.Currency{Code: "USDT", Name: "Tether", MarketValue: 1.01, CreatedAt: t, UpdatedAt: t})
@@ -114,9 +114,9 @@ func main() {
 
 			// create some transactions
 			tx := model.Transaction{
-				PricePerCoin: currency.MarketValue,
 				Quantity:     q,
 				CurrencyID:   currency.ID,
+				PricePerCoin: currency.MarketValue,
 				PortfolioID:  portfolio.ID,
 			}
 			db.Create(&tx)
