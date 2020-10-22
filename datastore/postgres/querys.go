@@ -9,7 +9,7 @@ func (ds dataStore) GetUserByID(id uint) (*model.User, error) {
 }
 
 func (ds dataStore) GetUserByIDs(ids []uint) ([]*model.User, error) {
-	users := []*model.User{}
+	var users []*model.User
 	result := ds.db.Find(&users, ids)
 	return users, result.Error
 }
@@ -27,31 +27,31 @@ func (ds dataStore) GetCurrencyByID (id uint) (*model.Currency, error) {
 }
 
 func (ds dataStore) GetCurrencyByIDs (ids []uint) ([]*model.Currency, error) {
-	currencies := []*model.Currency{}
+	var currencies []*model.Currency
 	result := ds.db.Find(&currencies, ids)
 	return currencies, result.Error
 }
 
 func (ds dataStore) GetTransactionsByPortfolioID (id uint) ([]*model.Transaction, error) {
-	transactions := []*model.Transaction{}
+	var transactions []*model.Transaction
 	result := ds.db.Where("portfolio_id = ?", id).Find(&transactions)
 	return transactions, result.Error
 }
 
 func (ds dataStore) GetTransactionsByPortfolioIDs (ids []uint) ([]*model.Transaction, error) {
-	transactions := []*model.Transaction{}
+	var transactions []*model.Transaction
 	result := ds.db.Where("portfolio_id IN ?", ids).Find(&transactions)
 	return transactions, result.Error
 }
 
 func (ds dataStore) GetAllCurrencies() ([]*model.Currency, error) {
-	currencies := []*model.Currency{}
+	var currencies []*model.Currency
 	result := ds.db.Find(&currencies)
 	return currencies, result.Error
 }
 
 func (ds dataStore) GetAllUsers() ([]*model.User, error) {
-	users := []*model.User{}
+	var users []*model.User
 	result := ds.db.Find(&users)
 	return users, result.Error
 }
@@ -63,19 +63,19 @@ func (ds dataStore) GetPortfolioByID(id uint) (*model.Portfolio, error) {
 }
 
 func (ds dataStore) GetPortfolioByIDs(ids []uint) ([]*model.Portfolio, error) {
-	portfolio := []*model.Portfolio{}
+	var portfolio []*model.Portfolio
 	result := ds.db.Find(&portfolio, ids)
 	return portfolio, result.Error
 }
 
 func (ds dataStore) GetPortfoliosByUserID(id uint) ([]*model.Portfolio, error) {
-	portfolios := []*model.Portfolio{}
+	var portfolios []*model.Portfolio
 	result := ds.db.Where("user_id = ?", id).Find(&portfolios)
 	return portfolios, result.Error
 }
 
 func (ds dataStore) GetPortfoliosByUserIDs(ids []uint) ([]*model.Portfolio, error) {
-	portfolios := []*model.Portfolio{}
+	var portfolios []*model.Portfolio
 	result := ds.db.Where("user_id IN ?", ids).Find(&portfolios)
 	return portfolios, result.Error
 }
