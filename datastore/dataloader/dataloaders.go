@@ -35,9 +35,21 @@ func Middleware(ds datastore.DataStore, next http.Handler) http.Handler {
 			wait:     wait,
 			maxBatch: 100,
 			fetch: func(keys []uint) ([]*model.User, []error) {
-				users, err := ds.GetUserByIDs(keys)
+				usersDB, err := ds.GetUserByIDs(keys)
 				if err != nil {
 					return nil, []error{err}
+				}
+
+				usersMap := make(map[uint]*model.User)
+				for _, u := range usersDB {
+					usersMap[u.ID] = u
+				}
+
+				users := make([]*model.User, len(keys))
+				for i, k := range keys {
+					if c, ok := usersMap[k]; ok {
+						users[i] = c
+					}
 				}
 				return users, nil
 			},
