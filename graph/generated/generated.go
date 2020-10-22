@@ -49,10 +49,12 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Currency struct {
-		Code func(childComplexity int) int
-		ID   func(childComplexity int) int
-		Name func(childComplexity int) int
-		Type func(childComplexity int) int
+		Code        func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		ID          func(childComplexity int) int
+		MarketValue func(childComplexity int) int
+		Name        func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -63,7 +65,6 @@ type ComplexityRoot struct {
 	}
 
 	Portfolio struct {
-		FiatCurrency func(childComplexity int) int
 		ID           func(childComplexity int) int
 		Name         func(childComplexity int) int
 		Transactions func(childComplexity int) int
@@ -78,7 +79,6 @@ type ComplexityRoot struct {
 	}
 
 	Transaction struct {
-		BoughtWith   func(childComplexity int) int
 		Currency     func(childComplexity int) int
 		Date         func(childComplexity int) int
 		ID           func(childComplexity int) int
@@ -108,7 +108,6 @@ type MutationResolver interface {
 type PortfolioResolver interface {
 	ID(ctx context.Context, obj *model.Portfolio) (string, error)
 
-	FiatCurrency(ctx context.Context, obj *model.Portfolio) (*model.Currency, error)
 	User(ctx context.Context, obj *model.Portfolio) (*model.User, error)
 	Transactions(ctx context.Context, obj *model.Portfolio) ([]*model.Transaction, error)
 }
@@ -120,7 +119,6 @@ type QueryResolver interface {
 }
 type TransactionResolver interface {
 	ID(ctx context.Context, obj *model.Transaction) (string, error)
-	BoughtWith(ctx context.Context, obj *model.Transaction) (*model.Currency, error)
 
 	Currency(ctx context.Context, obj *model.Transaction) (*model.Currency, error)
 
@@ -154,12 +152,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Currency.Code(childComplexity), true
 
+	case "Currency.createdAt":
+		if e.complexity.Currency.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Currency.CreatedAt(childComplexity), true
+
 	case "Currency.id":
 		if e.complexity.Currency.ID == nil {
 			break
 		}
 
 		return e.complexity.Currency.ID(childComplexity), true
+
+	case "Currency.marketValue":
+		if e.complexity.Currency.MarketValue == nil {
+			break
+		}
+
+		return e.complexity.Currency.MarketValue(childComplexity), true
 
 	case "Currency.name":
 		if e.complexity.Currency.Name == nil {
@@ -168,12 +180,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Currency.Name(childComplexity), true
 
-	case "Currency.type":
-		if e.complexity.Currency.Type == nil {
+	case "Currency.updatedAt":
+		if e.complexity.Currency.UpdatedAt == nil {
 			break
 		}
 
-		return e.complexity.Currency.Type(childComplexity), true
+		return e.complexity.Currency.UpdatedAt(childComplexity), true
 
 	case "Mutation.createCurrency":
 		if e.complexity.Mutation.CreateCurrency == nil {
@@ -222,13 +234,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(model.CreateUserInput)), true
-
-	case "Portfolio.fiatCurrency":
-		if e.complexity.Portfolio.FiatCurrency == nil {
-			break
-		}
-
-		return e.complexity.Portfolio.FiatCurrency(childComplexity), true
 
 	case "Portfolio.id":
 		if e.complexity.Portfolio.ID == nil {
@@ -290,13 +295,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.User(childComplexity, args["id"].(string)), true
-
-	case "Transaction.boughtWith":
-		if e.complexity.Transaction.BoughtWith == nil {
-			break
-		}
-
-		return e.complexity.Transaction.BoughtWith(childComplexity), true
 
 	case "Transaction.currency":
 		if e.complexity.Transaction.Currency == nil {
@@ -443,19 +441,17 @@ var sources = []*ast.Source{
     id: ID!
     code: String!
     name: String!
-    type: CurrencyType!
+    marketValue: Float!
+    updatedAt: Time!
+    createdAt: Time!
 }
 
-input CreateCurrencyInput @goModel(model: "guzfolio/model.CreateCurrencyInput"){
+input CreateCurrencyInput {
     code: String!
     name: String!
-    type: CurrencyType!
+    marketValue: Float!
 }
-
-enum CurrencyType @goModel(model: "guzfolio/model.CurrencyType"){
-    FIAT
-    CRYPTO
-}`, BuiltIn: false},
+`, BuiltIn: false},
 	{Name: "graph/schema/directives.graphql", Input: `# GQL Directives
 # This part is fairly necessary and is described in the gql documentation
 # https://gqlgen.com/config/
@@ -477,14 +473,12 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
 	{Name: "graph/schema/portfolio.graphql", Input: `type Portfolio @goModel(model: "guzfolio/model.Portfolio") {
     id: ID!
     name: String
-    fiatCurrency: Currency! @goField(forceResolver: true)
     user: User! @goField(forceResolver: true)
     transactions: [Transaction!] @goField(forceResolver: true)
 }
 
 input CreatePortfolioInput {
     userEmail: String!
-    fiatCurrencyCode: String!
     name: String
 }`, BuiltIn: false},
 	{Name: "graph/schema/query.graphql", Input: `type Query {
@@ -503,7 +497,6 @@ scalar Map
 scalar Any`, BuiltIn: false},
 	{Name: "graph/schema/transaction.graphql", Input: `type Transaction @goModel(model: "guzfolio/model.Transaction") {
     id: ID!
-    boughtWith: Currency! @goField(forceResolver: true)
     pricePerCoin: Float!
     quantity: Float!
     currency: Currency! @goField(forceResolver: true)
@@ -513,7 +506,6 @@ scalar Any`, BuiltIn: false},
 
 input CreateTransactionInput {
     porfolioID: ID!
-    boughtWith: String!
     pricePerCoin: Float!
     quantity: Float!
     currencyCode: String!
@@ -771,7 +763,7 @@ func (ec *executionContext) _Currency_name(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Currency_type(ctx context.Context, field graphql.CollectedField, obj *model.Currency) (ret graphql.Marshaler) {
+func (ec *executionContext) _Currency_marketValue(ctx context.Context, field graphql.CollectedField, obj *model.Currency) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -789,7 +781,7 @@ func (ec *executionContext) _Currency_type(ctx context.Context, field graphql.Co
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Type, nil
+		return obj.MarketValue, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -801,9 +793,79 @@ func (ec *executionContext) _Currency_type(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(model.CurrencyType)
+	res := resTmp.(float64)
 	fc.Result = res
-	return ec.marshalNCurrencyType2guzfolioᚋmodelᚐCurrencyType(ctx, field.Selections, res)
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Currency_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Currency) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Currency",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Currency_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Currency) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Currency",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1039,41 +1101,6 @@ func (ec *executionContext) _Portfolio_name(ctx context.Context, field graphql.C
 	res := resTmp.(*string)
 	fc.Result = res
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Portfolio_fiatCurrency(ctx context.Context, field graphql.CollectedField, obj *model.Portfolio) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Portfolio",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Portfolio().FiatCurrency(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Currency)
-	fc.Result = res
-	return ec.marshalNCurrency2ᚖguzfolioᚋmodelᚐCurrency(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Portfolio_user(ctx context.Context, field graphql.CollectedField, obj *model.Portfolio) (ret graphql.Marshaler) {
@@ -1394,41 +1421,6 @@ func (ec *executionContext) _Transaction_id(ctx context.Context, field graphql.C
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Transaction_boughtWith(ctx context.Context, field graphql.CollectedField, obj *model.Transaction) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Transaction",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Transaction().BoughtWith(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Currency)
-	fc.Result = res
-	return ec.marshalNCurrency2ᚖguzfolioᚋmodelᚐCurrency(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Transaction_pricePerCoin(ctx context.Context, field graphql.CollectedField, obj *model.Transaction) (ret graphql.Marshaler) {
@@ -2887,11 +2879,11 @@ func (ec *executionContext) unmarshalInputCreateCurrencyInput(ctx context.Contex
 			if err != nil {
 				return it, err
 			}
-		case "type":
+		case "marketValue":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-			it.Type, err = ec.unmarshalNCurrencyType2guzfolioᚋmodelᚐCurrencyType(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("marketValue"))
+			it.MarketValue, err = ec.unmarshalNFloat2float64(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2912,14 +2904,6 @@ func (ec *executionContext) unmarshalInputCreatePortfolioInput(ctx context.Conte
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userEmail"))
 			it.UserEmail, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "fiatCurrencyCode":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fiatCurrencyCode"))
-			it.FiatCurrencyCode, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2948,14 +2932,6 @@ func (ec *executionContext) unmarshalInputCreateTransactionInput(ctx context.Con
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("porfolioID"))
 			it.PorfolioID, err = ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "boughtWith":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("boughtWith"))
-			it.BoughtWith, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3068,8 +3044,18 @@ func (ec *executionContext) _Currency(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "type":
-			out.Values[i] = ec._Currency_type(ctx, field, obj)
+		case "marketValue":
+			out.Values[i] = ec._Currency_marketValue(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "updatedAt":
+			out.Values[i] = ec._Currency_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "createdAt":
+			out.Values[i] = ec._Currency_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
@@ -3157,20 +3143,6 @@ func (ec *executionContext) _Portfolio(ctx context.Context, sel ast.SelectionSet
 			})
 		case "name":
 			out.Values[i] = ec._Portfolio_name(ctx, field, obj)
-		case "fiatCurrency":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Portfolio_fiatCurrency(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "user":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -3313,20 +3285,6 @@ func (ec *executionContext) _Transaction(ctx context.Context, sel ast.SelectionS
 					}
 				}()
 				res = ec._Transaction_id(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "boughtWith":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Transaction_boughtWith(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -3777,16 +3735,6 @@ func (ec *executionContext) marshalNCurrency2ᚖguzfolioᚋmodelᚐCurrency(ctx 
 		return graphql.Null
 	}
 	return ec._Currency(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNCurrencyType2guzfolioᚋmodelᚐCurrencyType(ctx context.Context, v interface{}) (model.CurrencyType, error) {
-	var res model.CurrencyType
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNCurrencyType2guzfolioᚋmodelᚐCurrencyType(ctx context.Context, sel ast.SelectionSet, v model.CurrencyType) graphql.Marshaler {
-	return v
 }
 
 func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {

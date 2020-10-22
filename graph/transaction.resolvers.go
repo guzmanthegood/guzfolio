@@ -15,10 +15,6 @@ func (r *transactionResolver) ID(ctx context.Context, obj *model.Transaction) (s
 	return strconv.FormatUint(uint64(obj.ID), 10), nil
 }
 
-func (r *transactionResolver) BoughtWith(ctx context.Context, obj *model.Transaction) (*model.Currency, error) {
-	return dataloader.ContextLoaders(ctx).CurrencyByID.Load(obj.BoughtWithID)
-}
-
 func (r *transactionResolver) Currency(ctx context.Context, obj *model.Transaction) (*model.Currency, error) {
 	return dataloader.ContextLoaders(ctx).CurrencyByID.Load(obj.CurrencyID)
 }

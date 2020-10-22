@@ -2,15 +2,19 @@
 
 package model
 
+type CreateCurrencyInput struct {
+	Code        string  `json:"code"`
+	Name        string  `json:"name"`
+	MarketValue float64 `json:"marketValue"`
+}
+
 type CreatePortfolioInput struct {
-	UserEmail        string  `json:"userEmail"`
-	FiatCurrencyCode string  `json:"fiatCurrencyCode"`
-	Name             *string `json:"name"`
+	UserEmail string  `json:"userEmail"`
+	Name      *string `json:"name"`
 }
 
 type CreateTransactionInput struct {
 	PorfolioID   string  `json:"porfolioID"`
-	BoughtWith   string  `json:"boughtWith"`
 	PricePerCoin float64 `json:"pricePerCoin"`
 	Quantity     float64 `json:"quantity"`
 	CurrencyCode string  `json:"currencyCode"`
