@@ -6,7 +6,6 @@ package graph
 import (
 	"context"
 	"errors"
-
 	"guzfolio/auth"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
@@ -31,6 +30,13 @@ func (r *mutationResolver) CreateCurrency(ctx context.Context, input model.Creat
 		return nil, errors.New("action not allowed")
 	}
 	return r.DS.CreateCurrency(input)
+}
+
+func (r *mutationResolver) CreateTransaction(ctx context.Context, input model.CreateTransactionInput) (*model.Transaction, error) {
+	if !auth.ContextAuthUser(ctx).IsAdmin {
+		return nil, errors.New("action not allowed")
+	}
+	return r.DS.CreateTransaction(input)
 }
 
 // Mutation returns generated.MutationResolver implementation.

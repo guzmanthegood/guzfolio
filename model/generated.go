@@ -8,9 +8,16 @@ type CreatePortfolioInput struct {
 	Name             *string `json:"name"`
 }
 
+type CreateTransactionInput struct {
+	PorfolioID   string  `json:"porfolioID"`
+	BoughtWith   string  `json:"boughtWith"`
+	PricePerCoin float64 `json:"pricePerCoin"`
+	Quantity     float64 `json:"quantity"`
+	CurrencyCode string  `json:"currencyCode"`
+}
+
 type CreateUserInput struct {
 	Email    string `json:"email"`
 	Name     string `json:"name"`
 	Password string `json:"password"`
-	IsAdmin	 bool   `json:"isAdmin"`
 }

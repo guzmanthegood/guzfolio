@@ -32,20 +32,17 @@ func main() {
 	}
 
 	// drop tables
-	if db.Migrator().HasTable(&model.Currency{}) {
-		db.Migrator().DropTable(&model.Currency{})
-	}
-	if db.Migrator().HasTable(&model.User{}) {
-		db.Migrator().DropTable(&model.User{})
-	}
-	if db.Migrator().HasTable(&model.Portfolio{}) {
-		db.Migrator().DropTable(&model.Portfolio{})
-	}
+
+	db.Migrator().DropTable(&model.Currency{})
+	db.Migrator().DropTable(&model.User{})
+	db.Migrator().DropTable(&model.Portfolio{})
+	db.Migrator().DropTable(&model.Transaction{})
 
 	// automigrate model
 	db.AutoMigrate(&model.Currency{})
 	db.AutoMigrate(&model.User{})
 	db.AutoMigrate(&model.Portfolio{})
+	db.AutoMigrate(&model.Transaction{})
 
 	// create currencies
 	db.Create(&model.Currency{Code: "USD", Name: "United States dollar", Type: model.CurrencyTypeFiat})

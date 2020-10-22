@@ -23,6 +23,10 @@ func (r *portfolioResolver) User(ctx context.Context, obj *model.Portfolio) (*mo
 	return dataloader.ContextLoaders(ctx).UserByID.Load(obj.UserID)
 }
 
+func (r *portfolioResolver) Transactions(ctx context.Context, obj *model.Portfolio) ([]*model.Transaction, error) {
+	return dataloader.ContextLoaders(ctx).TransactionsByPortfolio.Load(obj.ID)
+}
+
 // Portfolio returns generated.PortfolioResolver implementation.
 func (r *Resolver) Portfolio() generated.PortfolioResolver { return &portfolioResolver{r} }
 

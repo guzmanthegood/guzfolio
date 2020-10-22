@@ -1,0 +1,17 @@
+type Transaction @goModel(model: "guzfolio/model.Transaction") {
+    id: ID!
+    boughtWith: Currency! @goField(forceResolver: true)
+    pricePerCoin: Float!
+    quantity: Float!
+    currency: Currency! @goField(forceResolver: true)
+    date: Time!
+    portfolio: Portfolio! @goField(forceResolver: true)
+}
+
+input CreateTransactionInput {
+    porfolioID: ID!
+    boughtWith: String!
+    pricePerCoin: Float!
+    quantity: Float!
+    currencyCode: String!
+}
