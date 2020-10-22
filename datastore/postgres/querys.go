@@ -32,9 +32,15 @@ func (ds dataStore) GetCurrencyByIDs (ids []uint) ([]*model.Currency, error) {
 	return currencies, result.Error
 }
 
-func (ds dataStore) GetTransactionsByUserID (id uint) ([]*model.Transaction, error){
+func (ds dataStore) GetTransactionsByPortfolioID (id uint) ([]*model.Transaction, error) {
 	transactions := []*model.Transaction{}
 	result := ds.db.Where("portfolio_id = ?", id).Find(&transactions)
+	return transactions, result.Error
+}
+
+func (ds dataStore) GetTransactionsByPortfolioIDs (ids []uint) ([]*model.Transaction, error) {
+	transactions := []*model.Transaction{}
+	result := ds.db.Where("portfolio_id IN ?", ids).Find(&transactions)
 	return transactions, result.Error
 }
 
@@ -44,7 +50,7 @@ func (ds dataStore) GetAllCurrencies() ([]*model.Currency, error) {
 	return currencies, result.Error
 }
 
-func (ds dataStore) GetAllUsers() ([]*model.User, error){
+func (ds dataStore) GetAllUsers() ([]*model.User, error) {
 	users := []*model.User{}
 	result := ds.db.Find(&users)
 	return users, result.Error
@@ -56,13 +62,13 @@ func (ds dataStore) GetPortfolioByID(id uint) (*model.Portfolio, error) {
 	return portfolio, result.Error
 }
 
-func (ds dataStore) GetPortfoliosByUserID(id uint) ([]*model.Portfolio, error){
+func (ds dataStore) GetPortfoliosByUserID(id uint) ([]*model.Portfolio, error) {
 	portfolios := []*model.Portfolio{}
 	result := ds.db.Where("user_id = ?", id).Find(&portfolios)
 	return portfolios, result.Error
 }
 
-func (ds dataStore) GetPortfoliosByUserIDs(ids []uint) ([]*model.Portfolio, error){
+func (ds dataStore) GetPortfoliosByUserIDs(ids []uint) ([]*model.Portfolio, error) {
 	portfolios := []*model.Portfolio{}
 	result := ds.db.Where("user_id IN ?", ids).Find(&portfolios)
 	return portfolios, result.Error

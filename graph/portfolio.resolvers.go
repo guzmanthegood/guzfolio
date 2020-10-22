@@ -24,7 +24,7 @@ func (r *portfolioResolver) User(ctx context.Context, obj *model.Portfolio) (*mo
 }
 
 func (r *portfolioResolver) Transactions(ctx context.Context, obj *model.Portfolio) ([]*model.Transaction, error) {
-	return r.DS.GetTransactionsByUserID(obj.ID) // todo: make transactionsByUsersID dataloader
+	return dataloader.ContextLoaders(ctx).TransactionsByPortfolio.Load(obj.ID)
 }
 
 // Portfolio returns generated.PortfolioResolver implementation.

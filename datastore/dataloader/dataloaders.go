@@ -1,6 +1,7 @@
 //go:generate go run github.com/vektah/dataloaden UserLoader uint *guzfolio/model.User
 //go:generate go run github.com/vektah/dataloaden CurrencyLoader uint *guzfolio/model.Currency
 //go:generate go run github.com/vektah/dataloaden PortfoliosLoader uint []*guzfolio/model.Portfolio
+//go:generate go run github.com/vektah/dataloaden TransactionsLoader uint []*guzfolio/model.Transaction
 
 package dataloader
 
@@ -14,9 +15,10 @@ import (
 )
 
 type Loaders struct {
-	UserByID			*UserLoader
-	CurrencyByID		*CurrencyLoader
-	PortfoliosByUser	*PortfoliosLoader
+	UserByID					*UserLoader
+	CurrencyByID				*CurrencyLoader
+	PortfoliosByUser			*PortfoliosLoader
+	TransactionsByPortfolio		*TransactionsLoader
 }
 
 func Middleware(ds datastore.DataStore, next http.Handler) http.Handler {
@@ -74,6 +76,31 @@ func Middleware(ds datastore.DataStore, next http.Handler) http.Handler {
 					}
 				}
 				return portfolios, nil
+			},
+		}
+
+		// 1:M loader, fetch transactions by profile key
+		loaders.TransactionsByPortfolio = &TransactionsLoader{
+			wait:     wait,
+			maxBatch: 100,
+			fetch: func(keys []uint) ([][]*model.Transaction, []error) {
+				transactionsDB, err := ds.GetTransactionsByPortfolioIDs(keys)
+				if err != nil {
+					return nil, []error{err}
+				}
+
+				transactionsMap := make(map[uint][]*model.Transaction)
+				for _, t := range transactionsDB {
+					transactionsMap[t.PortfolioID] = append(transactionsMap[t.PortfolioID], t)
+				}
+
+				transactions := make([][]*model.Transaction, len(keys))
+				for i, k := range keys {
+					if p, ok := transactionsMap[k]; ok {
+						transactions[i] = p
+					}
+				}
+				return transactions, nil
 			},
 		}
 
