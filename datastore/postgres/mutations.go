@@ -1,10 +1,8 @@
 package postgres
 
 import (
-	"guzfolio/model"
-	"time"
-
 	"golang.org/x/crypto/bcrypt"
+	"guzfolio/model"
 )
 
 func (ds dataStore) CreateUser(input model.CreateUserInput) (*model.User, error) {
@@ -32,17 +30,10 @@ func (ds dataStore) CreatePortfolio(input model.CreatePortfolioInput) (*model.Po
 		return nil, result.Error
 	}
 
-	// get currency
-	currency := model.Currency{}
-	result = ds.db.Where("code = ?", input.FiatCurrencyCode).First(&currency)
-	if result.Error != nil {
-		return nil, result.Error
-	}
 
 	// create portfolio
 	portfolio := &model.Portfolio{
 		User:       	user,
-		FiatCurrency:   currency,
 		Name:           input.Name,
 	}
 	result = ds.db.Create(portfolio)
@@ -53,7 +44,7 @@ func (ds dataStore) CreateCurrency(input model.CreateCurrencyInput) (*model.Curr
 	currency := &model.Currency{
 		Code: input.Code,
 		Name: input.Name,
-		Type: input.Type,
+		MarketValue: input.MarketValue,
 	}
 	result := ds.db.Create(currency)
 	return currency, result.Error
@@ -67,13 +58,6 @@ func (ds dataStore) CreateTransaction(input model.CreateTransactionInput) (*mode
 		return nil, result.Error
 	}
 
-	// get boughtWith currency
-	boughtWith := model.Currency{}
-	result = ds.db.Where("code = ?", input.BoughtWith).First(&boughtWith)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-
 	// get currency
 	currency := model.Currency{}
 	result = ds.db.Where("code = ?", input.CurrencyCode).First(&currency)
@@ -83,11 +67,9 @@ func (ds dataStore) CreateTransaction(input model.CreateTransactionInput) (*mode
 
 	// create transaction
 	transaction := &model.Transaction{
-		BoughtWith:   boughtWith,
 		PricePerCoin: input.PricePerCoin,
 		Quantity:     input.Quantity,
 		Currency:     currency,
-		Date:         time.Now(),
 		Portfolio:    portfolio,
 	}
 	result = ds.db.Create(transaction)
