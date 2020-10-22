@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -33,7 +34,6 @@ func main() {
 	}
 
 	// drop tables
-
 	db.Migrator().DropTable(&model.Currency{})
 	db.Migrator().DropTable(&model.User{})
 	db.Migrator().DropTable(&model.Portfolio{})
@@ -94,10 +94,33 @@ func main() {
 	db.Create(&model.User{Name: "Devin Antoinet", Email: "dantoineth@typepad.com", Password: pass, IsAdmin: false})
 	db.Create(&model.User{Name: "Cody Ossulton", Email: "cossultoni@cnbc.com", Password: pass, IsAdmin: false})
 
+	// new random generator
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	// get all currencies
+	var allCurrencies []model.Currency
+	db.Find(&allCurrencies)
+
 	// create portfolios
 	defaultPortfolio := "Default portfolio"
 	for userID := 1; userID < 21; userID++ {
-		db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: uint(userID)})
+		portfolio := &model.Portfolio{Name: &defaultPortfolio, UserID: uint(userID)}
+		db.Create(portfolio)
+
+		totalTx := r.Intn(20) + 5
+		for i := 0; i < totalTx; i++ {
+			currency := allCurrencies[r.Intn(len(allCurrencies))]
+			q := rand.Float64() * 10
+
+			// create some transactions
+			tx := model.Transaction{
+				PricePerCoin: currency.MarketValue,
+				Quantity:     q,
+				CurrencyID:   currency.ID,
+				PortfolioID:  portfolio.ID,
+			}
+			db.Create(&tx)
+		}
 	}
 
 	defaultPortfolio = "Default portfolio #02"
