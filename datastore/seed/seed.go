@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"guzfolio/model"
 
@@ -45,26 +46,27 @@ func main() {
 	db.AutoMigrate(&model.Transaction{})
 
 	// create currencies
-	db.Create(&model.Currency{Code: "BTC", Name: "Bitcoin", MarketValue: 12909.29})
-	db.Create(&model.Currency{Code: "ETH", Name: "Ethereum", MarketValue: 411.30})
-	db.Create(&model.Currency{Code: "USDT", Name: "Tether", MarketValue: 1.01})
-	db.Create(&model.Currency{Code: "XRP", Name: "XRP", MarketValue: 0.262765})
-	db.Create(&model.Currency{Code: "BCH", Name: "Bitcoin Cash", MarketValue: 270.01})
-	db.Create(&model.Currency{Code: "BNB", Name: "Binance Coin", MarketValue: 31.02})
-	db.Create(&model.Currency{Code: "LINK", Name: "Chainlink", MarketValue: 11.54})
-	db.Create(&model.Currency{Code: "DOT", Name: "Polkadot", MarketValue: 4.31})
-	db.Create(&model.Currency{Code: "ADA", Name: "Litecoin", MarketValue: 0.109642})
-	db.Create(&model.Currency{Code: "BSV", Name: "Bitcoin SV", MarketValue: 170.10})
-	db.Create(&model.Currency{Code: "CRO", Name: "Crypto.com Coin", MarketValue: 0.100035})
-	db.Create(&model.Currency{Code: "EOS", Name: "EOS", MarketValue: 2.68})
-	db.Create(&model.Currency{Code: "XMR", Name: "Monero", MarketValue: 126.12})
-	db.Create(&model.Currency{Code: "TRON", Name: "TRX", MarketValue: 0.02739823})
-	db.Create(&model.Currency{Code: "Tezos", Name: "XTZ", MarketValue: 2.22})
-	db.Create(&model.Currency{Code: "XLM", Name: "Stellar", MarketValue: 0.086645})
-	db.Create(&model.Currency{Code: "NEO", Name: "Neo", MarketValue: 18.86})
-	db.Create(&model.Currency{Code: "WBTC", Name: "Wrapped Bitcoin", MarketValue: 13002.70})
-	db.Create(&model.Currency{Code: "LEO", Name: "UNUS SED LEO", MarketValue: 1.25})
-	db.Create(&model.Currency{Code: "ATOM", Name: "Cosmos", MarketValue: 5.48})
+	t := time.Date(2020, time.Month(10), 1, 8, 0, 0, 0, time.UTC)
+	db.Create(&model.Currency{Code: "BTC", Name: "Bitcoin", MarketValue: 12909.29, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "ETH", Name: "Ethereum", MarketValue: 411.30, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "USDT", Name: "Tether", MarketValue: 1.01, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "XRP", Name: "XRP", MarketValue: 0.262765, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "BCH", Name: "Bitcoin Cash", MarketValue: 270.01, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "BNB", Name: "Binance Coin", MarketValue: 31.02, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "LINK", Name: "Chainlink", MarketValue: 11.54, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "DOT", Name: "Polkadot", MarketValue: 4.31, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "ADA", Name: "Litecoin", MarketValue: 0.109642, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "BSV", Name: "Bitcoin SV", MarketValue: 170.10, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "CRO", Name: "Crypto.com Coin", MarketValue: 0.100035, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "EOS", Name: "EOS", MarketValue: 2.68, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "XMR", Name: "Monero", MarketValue: 126.12, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "TRON", Name: "TRX", MarketValue: 0.02739823, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "Tezos", Name: "XTZ", MarketValue: 2.22, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "XLM", Name: "Stellar", MarketValue: 0.086645, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "NEO", Name: "Neo", MarketValue: 18.86, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "WBTC", Name: "Wrapped Bitcoin", MarketValue: 13002.70, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "LEO", Name: "UNUS SED LEO", MarketValue: 1.25, CreatedAt: t, UpdatedAt: t})
+	db.Create(&model.Currency{Code: "ATOM", Name: "Cosmos", MarketValue: 5.48, CreatedAt: t, UpdatedAt: t})
 
 	// create users
 	bytePassword := []byte("guzfolio1234")
