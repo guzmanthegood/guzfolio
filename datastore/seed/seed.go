@@ -45,32 +45,26 @@ func main() {
 	db.AutoMigrate(&model.Transaction{})
 
 	// create currencies
-	db.Create(&model.Currency{Code: "USD", Name: "United States dollar", Type: model.CurrencyTypeFiat})
-	db.Create(&model.Currency{Code: "EUR", Name: "Euro", Type: model.CurrencyTypeFiat})
-	db.Create(&model.Currency{Code: "JPY", Name: "Japanese yen", Type: model.CurrencyTypeFiat})
-	db.Create(&model.Currency{Code: "GBP", Name: "Pound sterling", Type: model.CurrencyTypeFiat})
-	db.Create(&model.Currency{Code: "AUD", Name: "Australian dollar", Type: model.CurrencyTypeFiat})
-
-	db.Create(&model.Currency{Code: "BTC", Name: "Bitcoin", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "ETH", Name: "Ethereum", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "USDT", Name: "Tether", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "XRP", Name: "XRP", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "BCH", Name: "Bitcoin Cash", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "BNB", Name: "Binance Coin", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "LINK", Name: "Chainlink", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "DOT", Name: "Polkadot", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "ADA", Name: "Litecoin", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "BSV", Name: "Bitcoin SV", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "CRO", Name: "Crypto.com Coin", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "EOS", Name: "EOS", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "XMR", Name: "Monero", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "TRON", Name: "TRX", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "Tezos", Name: "XTZ", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "XLM", Name: "Stellar", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "NEO", Name: "Neo", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "WBTC", Name: "Wrapped Bitcoin", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "LEO", Name: "UNUS SED LEO", Type: model.CurrencyTypeCrypto})
-	db.Create(&model.Currency{Code: "ATOM", Name: "Cosmos", Type: model.CurrencyTypeCrypto})
+	db.Create(&model.Currency{Code: "BTC", Name: "Bitcoin", MarketValue: 12909.29})
+	db.Create(&model.Currency{Code: "ETH", Name: "Ethereum", MarketValue: 411.30})
+	db.Create(&model.Currency{Code: "USDT", Name: "Tether", MarketValue: 1.01})
+	db.Create(&model.Currency{Code: "XRP", Name: "XRP", MarketValue: 0.262765})
+	db.Create(&model.Currency{Code: "BCH", Name: "Bitcoin Cash", MarketValue: 270.01})
+	db.Create(&model.Currency{Code: "BNB", Name: "Binance Coin", MarketValue: 31.02})
+	db.Create(&model.Currency{Code: "LINK", Name: "Chainlink", MarketValue: 11.54})
+	db.Create(&model.Currency{Code: "DOT", Name: "Polkadot", MarketValue: 4.31})
+	db.Create(&model.Currency{Code: "ADA", Name: "Litecoin", MarketValue: 0.109642})
+	db.Create(&model.Currency{Code: "BSV", Name: "Bitcoin SV", MarketValue: 170.10})
+	db.Create(&model.Currency{Code: "CRO", Name: "Crypto.com Coin", MarketValue: 0.100035})
+	db.Create(&model.Currency{Code: "EOS", Name: "EOS", MarketValue: 2.68})
+	db.Create(&model.Currency{Code: "XMR", Name: "Monero", MarketValue: 126.12})
+	db.Create(&model.Currency{Code: "TRON", Name: "TRX", MarketValue: 0.02739823})
+	db.Create(&model.Currency{Code: "Tezos", Name: "XTZ", MarketValue: 2.22})
+	db.Create(&model.Currency{Code: "XLM", Name: "Stellar", MarketValue: 0.086645})
+	db.Create(&model.Currency{Code: "NEO", Name: "Neo", MarketValue: 18.86})
+	db.Create(&model.Currency{Code: "WBTC", Name: "Wrapped Bitcoin", MarketValue: 13002.70})
+	db.Create(&model.Currency{Code: "LEO", Name: "UNUS SED LEO", MarketValue: 1.25})
+	db.Create(&model.Currency{Code: "ATOM", Name: "Cosmos", MarketValue: 5.48})
 
 	// create users
 	bytePassword := []byte("guzfolio1234")
@@ -100,28 +94,23 @@ func main() {
 
 	// create portfolios
 	defaultPortfolio := "Default portfolio"
-	currencyID := 1
 	for userID := 1; userID < 21; userID++ {
-		db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: uint(userID), FiatCurrencyID: uint(currencyID)})
-		currencyID++
-		if currencyID > 5 {
-			currencyID = 1
-		}
+		db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: uint(userID)})
 	}
 
 	defaultPortfolio = "Default portfolio #02"
-	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 1, FiatCurrencyID: 2})
+	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 1})
 	defaultPortfolio = "Default portfolio #03"
-	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 1, FiatCurrencyID: 3})
+	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 1})
 	defaultPortfolio = "Default portfolio #04"
-	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 1, FiatCurrencyID: 4})
+	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 1})
 
 	defaultPortfolio = "Default portfolio #02"
-	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 2, FiatCurrencyID: 3})
+	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 2})
 	defaultPortfolio = "Default portfolio #03"
-	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 2, FiatCurrencyID: 4})
+	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 2})
 	defaultPortfolio = "Default portfolio #04"
-	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 2, FiatCurrencyID: 5})
+	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 2})
 }
 
 func askForConfirmation(s string) bool {
