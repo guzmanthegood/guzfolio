@@ -8,6 +8,7 @@ type Portfolio struct {
 }
 
 type PortfolioReport struct {
+	PortfolioID			uint		`json:"portfolioID"`
 	TotalTransactions	int			`json:"totalTransactions"`
 	TotalValue			float64		`json:"totalValue"`
 	NetCost				float64		`json:"netCost"`

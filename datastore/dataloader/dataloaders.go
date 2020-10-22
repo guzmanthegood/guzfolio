@@ -1,6 +1,7 @@
 //go:generate go run github.com/vektah/dataloaden UserLoader uint *guzfolio/model.User
 //go:generate go run github.com/vektah/dataloaden CurrencyLoader uint *guzfolio/model.Currency
 //go:generate go run github.com/vektah/dataloaden PortfolioLoader uint *guzfolio/model.Portfolio
+//go:generate go run github.com/vektah/dataloaden PortfolioReportLoader uint *guzfolio/model.PortfolioReport
 //go:generate go run github.com/vektah/dataloaden PortfoliosLoader uint []*guzfolio/model.Portfolio
 //go:generate go run github.com/vektah/dataloaden TransactionsLoader uint []*guzfolio/model.Transaction
 
@@ -19,6 +20,7 @@ type Loaders struct {
 	UserByID					*UserLoader
 	CurrencyByID				*CurrencyLoader
 	PortfolioByID				*PortfolioLoader
+	PortfolioReportByID			*PortfolioReportLoader
 	PortfoliosByUser			*PortfoliosLoader
 	TransactionsByPortfolio		*TransactionsLoader
 }
@@ -102,6 +104,31 @@ func Middleware(ds datastore.DataStore, next http.Handler) http.Handler {
 					}
 				}
 				return portfolios, nil
+			},
+		}
+
+		// simple 1:1 loader, fetch a portfolio report by portfolio id
+		loaders.PortfolioReportByID = &PortfolioReportLoader{
+			wait:     wait,
+			maxBatch: 100,
+			fetch: func(keys []uint) ([]*model.PortfolioReport, []error) {
+				portfolioReportsDB, err := ds.GetPortfolioReports(keys)
+				if err != nil {
+					return nil, []error{err}
+				}
+
+				portfolioReportsMap := make(map[uint]*model.PortfolioReport)
+				for _, p := range portfolioReportsDB {
+					portfolioReportsMap[p.PortfolioID] = p
+				}
+
+				portfolioReports := make([]*model.PortfolioReport, len(keys))
+				for i, k := range keys {
+					if p, ok := portfolioReportsMap[k]; ok {
+						portfolioReports[i] = p
+					}
+				}
+				return portfolioReports, nil
 			},
 		}
 

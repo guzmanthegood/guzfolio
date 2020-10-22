@@ -132,19 +132,7 @@ func main() {
 		}
 	}
 
-	defaultPortfolio = "Default portfolio #02"
-	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 1})
-	defaultPortfolio = "Default portfolio #03"
-	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 1})
-	defaultPortfolio = "Default portfolio #04"
-	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 1})
 
-	defaultPortfolio = "Default portfolio #02"
-	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 2})
-	defaultPortfolio = "Default portfolio #03"
-	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 2})
-	defaultPortfolio = "Default portfolio #04"
-	db.Create(&model.Portfolio{Name: &defaultPortfolio, UserID: 2})
 }
 
 func askForConfirmation(s string) bool {
