@@ -48,9 +48,21 @@ func Middleware(ds datastore.DataStore, next http.Handler) http.Handler {
 			wait:     wait,
 			maxBatch: 100,
 			fetch: func(keys []uint) ([]*model.Currency, []error) {
-				currencies, err := ds.GetCurrencyByIDs(keys)
+				currenciesDB, err := ds.GetCurrencyByIDs(keys)
 				if err != nil {
 					return nil, []error{err}
+				}
+
+				currenciesMap := make(map[uint]*model.Currency)
+				for _, c := range currenciesDB {
+					currenciesMap[c.ID] = c
+				}
+
+				currencies := make([]*model.Currency, len(keys))
+				for i, k := range keys {
+					if c, ok := currenciesMap[k]; ok {
+						currencies[i] = c
+					}
 				}
 				return currencies, nil
 			},
