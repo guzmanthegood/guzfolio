@@ -1,6 +1,8 @@
 package postgres
 
-import "guzfolio/model"
+import (
+	"guzfolio/model"
+)
 
 func (ds dataStore) GetUserByID(id uint) (*model.User, error) {
 	user := &model.User{}
@@ -78,4 +80,40 @@ func (ds dataStore) GetPortfoliosByUserIDs(ids []uint) ([]*model.Portfolio, erro
 	var portfolios []*model.Portfolio
 	result := ds.db.Where("user_id IN ?", ids).Find(&portfolios)
 	return portfolios, result.Error
+}
+
+func (ds dataStore) GetPortfolioReport(id uint) (model.PortfolioReport, error) {
+	portfolioReport := model.PortfolioReport{}
+
+	query := `SELECT
+			t.portfolio_id portfolio_id,
+      		count(*) total_transactions,
+      		sum(t.quantity*c.market_value) total_value,
+      		sum(t.quantity*t.price_per_coin) net_cost,
+      		1-(sum(t.quantity*t.price_per_coin)/sum(t.quantity*c.market_value)) percent_change
+		FROM transactions t
+		INNER JOIN currencies c on t.currency_id = c.id
+		WHERE t.portfolio_id = ?
+		GROUP BY t.portfolio_id`
+
+	result := ds.db.Raw(query, id).Scan(&portfolioReport)
+	return portfolioReport, result.Error
+}
+
+func (ds dataStore) GetPortfolioReports(ids []uint) ([]*model.PortfolioReport, error) {
+	var portfolioReports []*model.PortfolioReport
+
+	query := `SELECT
+			t.portfolio_id portfolio_id,
+			count(*) total_transactions,
+			sum(t.quantity*c.market_value) total_value,
+			sum(t.quantity*t.price_per_coin) net_cost,
+			1-(sum(t.quantity*t.price_per_coin)/sum(t.quantity*c.market_value)) percent_change
+		FROM transactions t
+		INNER JOIN currencies c on t.currency_id = c.id
+		WHERE t.portfolio_id IN ?
+		GROUP BY t.portfolio_id`
+
+	result := ds.db.Raw(query, ids).Scan(&portfolioReports)
+	return portfolioReports, result.Error
 }
