@@ -24,7 +24,7 @@ func (r *transactionResolver) Currency(ctx context.Context, obj *model.Transacti
 }
 
 func (r *transactionResolver) Portfolio(ctx context.Context, obj *model.Transaction) (*model.Portfolio, error) {
-	return r.DS.GetPortfolioByID(obj.ID)
+	return dataloader.ContextLoaders(ctx).PortfolioByID.Load(obj.PortfolioID)
 }
 
 // Transaction returns generated.TransactionResolver implementation.
