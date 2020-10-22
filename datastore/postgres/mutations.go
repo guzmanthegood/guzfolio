@@ -1,10 +1,8 @@
 package postgres
 
 import (
-	"guzfolio/model"
-	"time"
-
 	"golang.org/x/crypto/bcrypt"
+	"guzfolio/model"
 )
 
 func (ds dataStore) CreateUser(input model.CreateUserInput) (*model.User, error) {
@@ -72,7 +70,6 @@ func (ds dataStore) CreateTransaction(input model.CreateTransactionInput) (*mode
 		PricePerCoin: input.PricePerCoin,
 		Quantity:     input.Quantity,
 		Currency:     currency,
-		Date:         time.Now(),
 		Portfolio:    portfolio,
 	}
 	result = ds.db.Create(transaction)

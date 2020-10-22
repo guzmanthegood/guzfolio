@@ -3,8 +3,8 @@ type Transaction @goModel(model: "guzfolio/model.Transaction") {
     pricePerCoin: Float!
     quantity: Float!
     currency: Currency! @goField(forceResolver: true)
-    date: Time!
     portfolio: Portfolio! @goField(forceResolver: true)
+    createdAt: Time!
 }
 
 input CreateTransactionInput {

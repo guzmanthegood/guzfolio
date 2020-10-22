@@ -10,7 +10,8 @@ type Transaction struct {
 	Quantity     float64    `json:"quantity"`
 	Currency     Currency   `json:"currency"`
 	CurrencyID	 uint		`json:"currencyID"`
-	Date         time.Time  `json:"date"`
 	Portfolio    Portfolio  `json:"portfolio"`
 	PortfolioID	 uint		`json:"portfolioID"`
+	UpdatedAt    time.Time 	`json:"updatedAt"`
+	CreatedAt    time.Time 	`json:"createdAt"`
 }
