@@ -17,21 +17,33 @@ func (r *portfolioResolver) ID(ctx context.Context, obj *model.Portfolio) (strin
 
 func (r *portfolioResolver) TotalValue(ctx context.Context, obj *model.Portfolio) (float64, error) {
 	report, err := dataloader.ContextLoaders(ctx).PortfolioReportByID.Load(obj.ID)
+	if report == nil {
+		return 0, err
+	}
 	return report.TotalValue, err
 }
 
 func (r *portfolioResolver) NetCost(ctx context.Context, obj *model.Portfolio) (float64, error) {
 	report, err := dataloader.ContextLoaders(ctx).PortfolioReportByID.Load(obj.ID)
+	if report == nil {
+		return 0, err
+	}
 	return report.NetCost, err
 }
 
 func (r *portfolioResolver) PercentChange(ctx context.Context, obj *model.Portfolio) (float64, error) {
 	report, err := dataloader.ContextLoaders(ctx).PortfolioReportByID.Load(obj.ID)
+	if report == nil {
+		return 0, err
+	}
 	return report.PercentChange, err
 }
 
 func (r *portfolioResolver) TotalTransactions(ctx context.Context, obj *model.Portfolio) (int, error) {
 	report, err := dataloader.ContextLoaders(ctx).PortfolioReportByID.Load(obj.ID)
+	if report == nil {
+		return 0, err
+	}
 	return report.TotalTransactions, err
 }
 
