@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.4.0 (October 23, 2020)
+
+### Added
+- **Transaction** model has been added
+    - A portfolio consists a list of transactions executed at the time of buying or selling cryptocurrencies
+    - The objective is to know the difference (profit/lost) of the purchases of these cryptocurrencies
+- `seeds.go` now generates transactions with random values for portfolios created by default
+    
+### Updated
+- **Portfolio** model has been updated
+    - `totalValue`, `netCost`, `percentChange`, `totalTransactions` aggregated fields has been added
+- The concept of fiat currency has been removed from the model. All exchange rates are applied in USD (US Dollar)
+- GraphQL queries and mutations has been added to `README.md`
+
+### Fixed
+- 1:1 dataloaders has been fixed. The order in which the values were returned was not correct, it's important to 
+return the results in the same order that they are requested.
+- Removed queries from datastore package that are not used
+
 ## v0.3.0 (October 21, 2020)
 
 - `auth` package has been added
