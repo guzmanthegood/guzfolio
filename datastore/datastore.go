@@ -5,18 +5,13 @@ import (
 )
 
 type DataStore interface {
-	GetUserByID(id uint) (*model.User, error)
 	GetUserByIDs(ids []uint) ([]*model.User, error)
 	GetUserByEmail(email string) (*model.User, error)
-	GetCurrencyByID (id uint) (*model.Currency, error)
 	GetCurrencyByIDs (ids []uint) ([]*model.Currency, error)
-	GetTransactionsByPortfolioID (id uint) ([]*model.Transaction, error)
 	GetTransactionsByPortfolioIDs (ids []uint) ([]*model.Transaction, error)
 	GetAllCurrencies() ([]*model.Currency, error)
 	GetAllUsers() ([]*model.User, error)
-	GetPortfolioByID(id uint) (*model.Portfolio, error)
 	GetPortfolioByIDs(ids []uint) ([]*model.Portfolio, error)
-	GetPortfoliosByUserID(id uint) ([]*model.Portfolio, error)
 	GetPortfoliosByUserIDs(id []uint) ([]*model.Portfolio, error)
 	GetPortfolioReports(ids []uint) ([]*model.PortfolioReport, error)
 	CreateUser(input model.CreateUserInput) (*model.User, error)

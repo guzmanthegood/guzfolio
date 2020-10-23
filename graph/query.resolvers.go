@@ -7,13 +7,14 @@ import (
 	"context"
 	"errors"
 	"guzfolio/auth"
+	"guzfolio/datastore/dataloader"
 	"guzfolio/graph/generated"
 	"guzfolio/model"
 	"strconv"
 )
 
 func (r *queryResolver) Profile(ctx context.Context) (*model.User, error) {
-	return r.DS.GetUserByID(auth.ContextAuthUser(ctx).UserID)
+	return dataloader.ContextLoaders(ctx).UserByID.Load(auth.ContextAuthUser(ctx).UserID)
 }
 
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
@@ -26,7 +27,7 @@ func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error
 	if !auth.ContextAuthUser(ctx).IsAdmin && uint(userID) != a.UserID {
 		return nil, errors.New("action not allowed")
 	}
-	return r.DS.GetUserByID(uint(userID))
+	return dataloader.ContextLoaders(ctx).UserByID.Load(uint(userID))
 }
 
 func (r *queryResolver) AllUsers(ctx context.Context) ([]*model.User, error) {
