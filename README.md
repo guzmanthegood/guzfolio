@@ -49,6 +49,23 @@ include the following JSON in the HTTP HEADERS section at the bottom.
 }
 ```
 
+## Schema
+```graphql
+type Query {
+    profile: User!
+    user(id:ID!): User!
+    allUsers: [User!]!
+    allCurrencies: [Currency!]!
+}
+
+type Mutation {
+    createUser(input: CreateUserInput!): User!
+    createPortfolio(input: CreatePortfolioInput!): Portfolio!
+    createCurrency(input: CreateCurrencyInput!): Currency!
+    createTransaction(input: CreateTransactionInput!): Transaction!
+}
+```
+
 ## Dependencies
 | **Tech**                                              | **Description**                                                            |
 | ----------------------------------------------------  | -------------------------------------------------------------------------- |
