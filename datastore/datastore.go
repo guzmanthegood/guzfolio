@@ -18,7 +18,6 @@ type DataStore interface {
 	GetPortfolioByIDs(ids []uint) ([]*model.Portfolio, error)
 	GetPortfoliosByUserID(id uint) ([]*model.Portfolio, error)
 	GetPortfoliosByUserIDs(id []uint) ([]*model.Portfolio, error)
-	GetPortfolioReport(id uint) (model.PortfolioReport, error)
 	GetPortfolioReports(ids []uint) ([]*model.PortfolioReport, error)
 	CreateUser(input model.CreateUserInput) (*model.User, error)
 	CreatePortfolio(input model.CreatePortfolioInput) (*model.Portfolio, error)
