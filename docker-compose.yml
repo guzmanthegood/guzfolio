@@ -1,0 +1,17 @@
+version: "3.1"
+services:
+  guzfolio:
+    build: .
+    restart: always
+    environment:
+      PORT: ${GUZFOLIO_PORT}
+      DEBUG: ${GUZFOLIO_DEBUG}
+      PG_CONNECTION_STRING: ${GUZFOLIO_PG_CONNECTION_STRING}
+      JWT_SECRET: ${GUZFOLIO_JWT_SECRET}
+    depends_on:
+      - db
+    command: ["./wait-for-it.sh", "db:5432", "--", "./guzfolio"]
+  db:
+    extends:
+      file: docker/docker-compose.postgres.yml
+      service: db
