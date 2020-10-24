@@ -1,51 +1,35 @@
-package main
+package server
 
 import (
 	"context"
 	"log"
 	"net/http"
-	"os"
 
-	"guzfolio/datastore/postgres"
+	"guzfolio/datastore"
 )
 
-const defaultPort = "8080"
-
 type server struct {
-	server 	*http.Server
-	port   	string
-	debug 	bool
+	server *http.Server
+	port   string
+	debug  bool
 }
 
-func main() {
-	s := server{}
+type Server interface {
+	Start()
+	Stop()
+}
 
-	// get default port
-	s.port = os.Getenv("PORT")
-	if s.port == "" {
-		s.port = defaultPort
+func CreateServer(debug bool, port string, ds datastore.DataStore) Server {
+	return &server{
+		server: &http.Server{
+			Addr:    ":" + port,
+			Handler: newRouter(ds),
+		},
 	}
-
-	// get debug mode
-	s.debug = true
-	if os.Getenv("DEBUG") == "0" {
-		s.debug = false
-	}
-
-	// get data base connection
-	ds := postgres.New(os.Getenv("PG_CONNECTION_STRING"), s.debug)
-
-	// initialize server
-	s.server = &http.Server{
-		Addr:    ":" + s.port,
-		Handler: newRouter(ds),
-	}
-
-	s.start()
 }
 
 // start server
-func (s *server) start() {
+func (s *server) Start() {
 	log.Printf("[INFO] connect to http://localhost:%s/ for GraphQL playground", s.port)
 
 	if err := s.server.ListenAndServe(); err != http.ErrServerClosed {
@@ -54,7 +38,7 @@ func (s *server) start() {
 }
 
 // stop server
-func (s *server) stop() {
+func (s *server) Stop() {
 	if err := s.server.Shutdown(context.Background()); err != nil {
 		log.Fatal("[ERRO] error during shutdown", err)
 	}
