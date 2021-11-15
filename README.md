@@ -1,5 +1,3 @@
-test
-
 # Guzfolio
 Guzfolio is a cryptocurrency portfolio tracker with the purpose of using it as a pattern for the implementation of good 
 practices in the development of API's in [GraphQL](https://graphql.org) using [Go](https://golang.org). 
